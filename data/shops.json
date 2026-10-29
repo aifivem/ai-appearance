@@ -1,0 +1,222 @@
+{
+  "barber_1": {
+    "type": "barber",
+    "coords": {
+      "x": -813.12,
+      "y": -183.98,
+      "z": 37.0
+    },
+    "radius": 12,
+    "blip": true
+  },
+  "barber_2": {
+    "type": "barber",
+    "coords": {
+      "x": 136.0,
+      "y": -1709.94,
+      "z": 30.0
+    },
+    "radius": 7.6,
+    "blip": true
+  },
+  "barber_3": {
+    "type": "barber",
+    "coords": {
+      "x": -1284.8,
+      "y": -1117.65,
+      "z": 7.0
+    },
+    "radius": 7.5,
+    "blip": true
+  },
+  "barber_4": {
+    "type": "barber",
+    "coords": {
+      "x": 1933.05,
+      "y": 3728.71,
+      "z": 32.0
+    },
+    "radius": 7.6,
+    "blip": true
+  },
+  "barber_5": {
+    "type": "barber",
+    "coords": {
+      "x": 1210.35,
+      "y": -472.68,
+      "z": 66.0
+    },
+    "radius": 7.6,
+    "blip": true
+  },
+  "barber_6": {
+    "type": "barber",
+    "coords": {
+      "x": -32.71,
+      "y": -150.4,
+      "z": 57.0
+    },
+    "radius": 7.6,
+    "blip": true
+  },
+  "barber_7": {
+    "type": "barber",
+    "coords": {
+      "x": -280.0,
+      "y": 6229.27,
+      "z": 31.0
+    },
+    "radius": 7.6,
+    "blip": true
+  },
+  "clothing_1": {
+    "type": "clothing",
+    "coords": {
+      "x": 1693.27,
+      "y": 4823.7,
+      "z": 41.0
+    },
+    "radius": 10.4,
+    "blip": true
+  },
+  "clothing_2": {
+    "type": "clothing",
+    "coords": {
+      "x": -707.54,
+      "y": -152.78,
+      "z": 37.0
+    },
+    "radius": 12,
+    "blip": true
+  },
+  "clothing_3": {
+    "type": "clothing",
+    "coords": {
+      "x": -1194.18,
+      "y": -772.33,
+      "z": 15.0
+    },
+    "radius": 12,
+    "blip": true
+  },
+  "clothing_4": {
+    "type": "clothing",
+    "coords": {
+      "x": 426.34,
+      "y": -805.06,
+      "z": 29.0
+    },
+    "radius": 10.8,
+    "blip": true
+  },
+  "clothing_5": {
+    "type": "clothing",
+    "coords": {
+      "x": -165.18,
+      "y": -301.28,
+      "z": 40.0
+    },
+    "radius": 12,
+    "blip": true
+  },
+  "clothing_6": {
+    "type": "clothing",
+    "coords": {
+      "x": 74.47,
+      "y": -1394.07,
+      "z": 29.0
+    },
+    "radius": 10.9,
+    "blip": true
+  },
+  "clothing_7": {
+    "type": "clothing",
+    "coords": {
+      "x": -822.99,
+      "y": -1074.55,
+      "z": 11.0
+    },
+    "radius": 10.3,
+    "blip": true
+  },
+  "clothing_8": {
+    "type": "clothing",
+    "coords": {
+      "x": -1449.47,
+      "y": -239.65,
+      "z": 49.0
+    },
+    "radius": 12,
+    "blip": true
+  },
+  "clothing_9": {
+    "type": "clothing",
+    "coords": {
+      "x": 5.16,
+      "y": 6513.5,
+      "z": 31.0
+    },
+    "radius": 10.3,
+    "blip": true
+  },
+  "clothing_10": {
+    "type": "clothing",
+    "coords": {
+      "x": 617.76,
+      "y": 2756.88,
+      "z": 42.0
+    },
+    "radius": 12,
+    "blip": true
+  },
+  "clothing_11": {
+    "type": "clothing",
+    "coords": {
+      "x": 1195.76,
+      "y": 2709.53,
+      "z": 38.0
+    },
+    "radius": 10.2,
+    "blip": true
+  },
+  "clothing_12": {
+    "type": "clothing",
+    "coords": {
+      "x": -3170.98,
+      "y": 1050.61,
+      "z": 20.0
+    },
+    "radius": 12,
+    "blip": true
+  },
+  "clothing_13": {
+    "type": "clothing",
+    "coords": {
+      "x": -1102.86,
+      "y": 2710.36,
+      "z": 19.0
+    },
+    "radius": 10.9,
+    "blip": true
+  },
+  "clothing_14": {
+    "type": "clothing",
+    "coords": {
+      "x": 124.89,
+      "y": -216.94,
+      "z": 54.0
+    },
+    "radius": 12,
+    "blip": true
+  },
+  "clothing_15": {
+    "type": "clothing",
+    "coords": {
+      "x": 106.81,
+      "y": -1303.09,
+      "z": 28.0
+    },
+    "radius": 5.6,
+    "blip": true
+  }
+}
