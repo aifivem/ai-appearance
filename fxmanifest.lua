@@ -1,5 +1,5 @@
 name 'ai-appearance'
-author 'ai-core'
+author 'TGIANN'
 version '0.1.0'
 license 'GPL-3.0-only'
 description 'Character creator, clothing shops and barbers'

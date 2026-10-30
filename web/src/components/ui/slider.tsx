@@ -52,7 +52,7 @@ export function Slider({ className, origin, ...props }: SliderProps) {
       )}
       <SliderPrimitive.Thumb
         data-slot="slider-thumb"
-        className="relative z-[1] block size-[1.6vh] cursor-grab rounded-full bg-white transition-[box-shadow] duration-150 outline-none after:absolute after:-inset-[0.6vh] after:content-[''] hover:[box-shadow:0_0_0_0.4vh_var(--green-20)] focus-visible:[box-shadow:0_0_0_0.4vh_var(--green-40)] active:cursor-grabbing"
+        className="relative z-[1] block size-[1.6vh] cursor-grab rounded-full bg-white transition-[box-shadow] duration-150 outline-none after:absolute after:-inset-[0.6vh] after:content-[''] hover:[box-shadow:0_0_0_0.4vh_var(--green-20)] active:cursor-grabbing"
       />
     </SliderPrimitive.Root>
   );
