@@ -1,4 +1,9 @@
-import { cache, onServerEvent, requestModel } from "@aicore-fivem/lib/client";
+import {
+  cache,
+  onServerEvent,
+  pedHeadshot,
+  requestModel,
+} from "@aicore-fivem/lib/client";
 import {
   asArgs,
   createLogger,
@@ -65,15 +70,10 @@ class Portraits {
         3000,
       ).catch(() => undefined);
       await sleep(100);
-      const handle = RegisterPedheadshotTransparent(ped);
-      await waitFor(
-        () =>
-          (IsPedheadshotReady(handle) && IsPedheadshotValid(handle)) ||
-          undefined,
-        5000,
-      );
-      this.shots.set(id, { handle, key });
-      this.announce(id, handle);
+      const shot = await pedHeadshot(ped, true);
+      if (!shot) return;
+      this.shots.set(id, { handle: shot.handle, key });
+      this.announce(id, shot.handle);
     } finally {
       DeletePed(ped);
     }
