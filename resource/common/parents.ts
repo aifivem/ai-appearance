@@ -1,4 +1,4 @@
-import type { Parent } from "./nui";
+import type { Parent } from "./nui"
 
 /** Heritage parents (head blend faces of the base game) with their creator portraits. */
 export const MOTHERS: Parent[] = [
@@ -24,7 +24,7 @@ export const MOTHERS: Parent[] = [
   { id: 40, name: "Charlotte", image: "char_creator_portraits/female_19" },
   { id: 41, name: "Emma", image: "char_creator_portraits/female_20" },
   { id: 45, name: "Misty", image: "char_creator_portraits/special_female_0" },
-];
+]
 
 export const FATHERS: Parent[] = [
   { id: 0, name: "Benjamin", image: "char_creator_portraits/male_0" },
@@ -51,7 +51,7 @@ export const FATHERS: Parent[] = [
   { id: 42, name: "Claude", image: "char_creator_portraits/special_male_0" },
   { id: 43, name: "Niko", image: "char_creator_portraits/special_male_1" },
   { id: 44, name: "John", image: "char_creator_portraits/special_male_2" },
-];
+]
 
 /** Texture dictionary of the portraits; loaded on the client before the creator opens. */
-export const PORTRAIT_DICT = "char_creator_portraits";
+export const PORTRAIT_DICT = "char_creator_portraits"
