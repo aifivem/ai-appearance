@@ -1,18 +1,20 @@
 import { useEffect } from "react";
-import { Outlet } from "@tanstack/react-router";
+import { Outlet, useParams } from "@tanstack/react-router";
 import { motion } from "motion/react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faArrowsRotate } from "@fortawesome/free-solid-svg-icons";
+import { faComputerMouse } from "@fortawesome/free-solid-svg-icons";
 import { useNuiEvent } from "fivem-nui-react";
 import { NuiMessage } from "../../../../resource/common/nui";
 import { ScrollArea } from "../../components/ui/scroll-area";
+import { TooltipProvider } from "../../components/ui/tooltip";
 import { mockOpenData } from "../../dev/mock";
 import { useLang } from "../../lib/lang";
 import { useAppSelector } from "../../store";
 import { cancel, closeEditor, openEditor, toEditorData } from "./actions";
 import { DragSurface } from "./DragSurface";
 import { Footer } from "./Footer";
-import { TabBar } from "./TabBar";
+import { TAB_INFO, TabBar } from "./TabBar";
+import { isTab } from "./tabs";
 
 const TITLES = {
   creator: ["UI_TITLE_CREATOR", "UI_SUB_CREATOR"],
@@ -28,11 +30,12 @@ function onOpen(value: unknown): void {
   if (data) openEditor(data);
 }
 
-/** Root of the NUI: listens to the client, and while open shows the game view controls and the editor panel. */
+/** Root of the NUI: listens to the client; while open, the title top left, category column and menu on the right, checkout bottom left, all over the game. */
 export function Editor() {
   const t = useLang();
   const open = useAppSelector((state) => state.editor.open);
   const mode = useAppSelector((state) => state.editor.data?.mode);
+  const { tab } = useParams({ strict: false });
 
   useNuiEvent(NuiMessage.open, onOpen, OPEN_OPTIONS);
   useNuiEvent(NuiMessage.close, closeEditor);
@@ -48,31 +51,52 @@ export function Editor() {
   const [title, sub] = TITLES[mode];
 
   return (
-    <div className="absolute inset-0">
-      <DragSurface />
-      <div className="pointer-events-none absolute bottom-[3vh] left-[52vh] right-0 flex justify-center">
-        <span className="flex items-center gap-[0.8vh] rounded-full border border-line bg-[rgba(var(--panel-rgb),0.92)] px-[1.4vh] py-[0.7vh] text-[1.2vh] text-text-3">
-          <FontAwesomeIcon icon={faArrowsRotate} aria-hidden />
-          {t("UI_ROTATE_HINT")}
-        </span>
-      </div>
+    <TooltipProvider delayDuration={300}>
+      <div className="absolute inset-0 [box-shadow:inset_-1vh_-1vh_20vh_rgba(0,0,0,0.9)]">
+        <DragSurface />
+        {/* Scrims as tgiann-clothing: dark on the left behind the title and dock, darker on the right behind the menu. */}
+        <div className="pointer-events-none absolute inset-y-0 left-0 w-[60vh] bg-[linear-gradient(90deg,rgba(0,0,0,0.7)_0%,rgba(0,0,0,0.35)_60%,rgba(0,0,0,0)_100%)]" />
+        <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(90deg,rgba(0,0,0,0)_0%,rgba(0,0,0,0)_60%,rgba(0,0,0,0.7)_80%,rgba(0,0,0,1)_100%)]" />
 
-      <motion.aside
-        initial={{ opacity: 0, x: "-2vh" }}
-        animate={{ opacity: 1, x: 0 }}
-        transition={{ type: "spring", duration: 0.4, bounce: 0 }}
-        className="absolute bottom-[3vh] left-[3vh] top-[3vh] flex w-[46vh] flex-col overflow-hidden rounded-[1vh] border border-line bg-[rgba(var(--panel-rgb),0.96)] [box-shadow:inset_0_0.1vh_0_rgba(255,255,255,0.04),0_2.4vh_6.4vh_rgba(0,0,0,0.6)]"
-      >
-        <header className="flex flex-col gap-[0.6vh] px-[2.4vh] pb-[1.6vh] pt-[2.4vh]">
-          <h1 className="text-[2.2vh] font-semibold leading-[1.2] tracking-[-0.01em]">{t(title)}</h1>
-          <p className="text-[1.3vh] leading-[1.4] text-text-3">{t(sub)}</p>
-        </header>
-        <TabBar mode={mode} />
-        <ScrollArea className="min-h-0 flex-1">
-          <Outlet />
-        </ScrollArea>
+        <motion.header
+          initial={{ opacity: 0, x: "-2vh" }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ type: "spring", duration: 0.4, bounce: 0 }}
+          className="pointer-events-none absolute left-[3vh] top-[3vh] flex max-w-[70vh] flex-col gap-[1.2vh] [text-shadow:0.1vh_0.1vh_#000]"
+        >
+          <h1 className="font-display font-extrabold text-[4.4vh] uppercase leading-none tracking-[-0.01em]">{t(title)}</h1>
+          <p className="text-[1.6vh] text-text-2">{t(sub)}</p>
+          <span className="mt-[0.8vh] flex items-center gap-[0.8vh] text-[1.4vh] font-medium text-white/85">
+            <span className="inline-flex h-[2.2vh] min-w-[2.2vh] items-center justify-center rounded-[0.4vh] bg-white/90 text-[1.1vh] text-black [text-shadow:none]">
+              <FontAwesomeIcon icon={faComputerMouse} aria-hidden />
+            </span>
+            {t("UI_ROTATE_HINT")}
+          </span>
+        </motion.header>
+
+        <motion.div
+          initial={{ opacity: 0, x: "2vh" }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ type: "spring", duration: 0.4, bounce: 0 }}
+          className="absolute inset-y-0 right-[50vh] my-auto h-fit"
+        >
+          <TabBar mode={mode} />
+        </motion.div>
+
+        <motion.aside
+          initial={{ opacity: 0, x: "2vh" }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ type: "spring", duration: 0.4, bounce: 0 }}
+          className="absolute bottom-[2vh] right-[2vh] top-[3vh] flex w-[46vh] flex-col gap-[2vh] [text-shadow:0.1vh_0.1vh_#000]"
+        >
+          <h2 className="truncate font-display font-extrabold text-[2.8vh] uppercase leading-[1.2] tracking-[-0.01em]">{isTab(tab) ? t(TAB_INFO[tab].label) : t(title)}</h2>
+          <ScrollArea className="min-h-0 flex-1">
+            <Outlet />
+          </ScrollArea>
+        </motion.aside>
+
         <Footer mode={mode} />
-      </motion.aside>
-    </div>
+      </div>
+    </TooltipProvider>
   );
 }

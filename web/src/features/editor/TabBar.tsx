@@ -4,6 +4,7 @@ import type { IconDefinition } from "@fortawesome/fontawesome-svg-core";
 import { faDna, faFaceSmile, faGem, faHandSparkles, faPalette, faScissors, faShirt } from "@fortawesome/free-solid-svg-icons";
 import type { EditorMode } from "../../../../resource/common/nui";
 import { Tabs, TabsList, TabsTrigger } from "../../components/ui/tabs";
+import { Tooltip, TooltipContent, TooltipTrigger } from "../../components/ui/tooltip";
 import { useLang } from "../../lib/lang";
 import { goToTab } from "./actions";
 import { isTab, TABS, type Tab } from "./tabs";
@@ -18,21 +19,25 @@ export const TAB_INFO: Record<Tab, { icon: IconDefinition; label: string }> = {
   accessories: { icon: faGem, label: "UI_TAB_ACCESSORIES" },
 };
 
-/** The mode's tabs; the open one comes from the router. */
-export function TabBar({ mode }: { mode: EditorMode }) {
+/** The mode's tabs as the round category column; the open one comes from the router, hover shows its name. */
+export function TabBar({ mode, className }: { mode: EditorMode; className?: string }) {
   const t = useLang();
   const { tab } = useParams({ strict: false });
   const tabs = TABS[mode];
   if (tabs.length < 2) return null;
   const active = isTab(tab) ? tabs.indexOf(tab) : -1;
   return (
-    <Tabs className="mx-[2.4vh]" value={isTab(tab) ? tab : undefined} onValueChange={(value) => isTab(value) && goToTab(value)}>
-      <TabsList active={active} count={tabs.length}>
+    <Tabs className={className} orientation="vertical" value={isTab(tab) ? tab : undefined} onValueChange={(value) => isTab(value) && goToTab(value)}>
+      <TabsList active={active}>
         {tabs.map((id) => (
-          <TabsTrigger key={id} value={id} title={t(TAB_INFO[id].label)}>
-            <FontAwesomeIcon icon={TAB_INFO[id].icon} className="text-[1.6vh]" aria-hidden />
-            <span className="max-w-full truncate px-[0.3vh] leading-[1.3]">{t(TAB_INFO[id].label)}</span>
-          </TabsTrigger>
+          <Tooltip key={id}>
+            <TooltipTrigger asChild>
+              <TabsTrigger value={id} aria-label={t(TAB_INFO[id].label)}>
+                <FontAwesomeIcon icon={TAB_INFO[id].icon} aria-hidden />
+              </TabsTrigger>
+            </TooltipTrigger>
+            <TooltipContent side="left">{t(TAB_INFO[id].label)}</TooltipContent>
+          </Tooltip>
         ))}
       </TabsList>
     </Tabs>

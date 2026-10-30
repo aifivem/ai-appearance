@@ -6,7 +6,7 @@ import { mockChanged } from "./mock";
 /** Browser preview only: a game-like backdrop (the page is transparent in game) and the `&changed=1` edits. */
 export function applyPreview(): void {
   if (!isEnvBrowser()) return;
-  document.body.style.background = "linear-gradient(135deg, #2b3440 0%, #11161c 100%)";
+  document.body.style.background = "linear-gradient(135deg, #3a3a3a 0%, #0e0e0e 100%)";
   if (!mockChanged) return;
   // Edit once the mocked open has arrived and settled.
   const stop = store.subscribe(() => {

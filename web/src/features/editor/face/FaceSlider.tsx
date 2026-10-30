@@ -20,7 +20,7 @@ export function FaceSlider({ slider }: { slider: FaceSliderConfig }) {
   return (
     <div className="flex flex-col gap-[0.6vh]" onPointerDown={() => focusCamera("face")} onDoubleClick={() => set(0)}>
       <div className="flex items-baseline justify-between text-[1.3vh]">
-        <span className="font-medium text-text">{label}</span>
+        <span className="font-medium text-white/90">{label}</span>
         <span className="tabular-nums text-text-3">{axisPosition(ratio)}</span>
       </div>
       <Slider

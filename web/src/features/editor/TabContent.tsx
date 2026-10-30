@@ -27,7 +27,7 @@ export function TabContent() {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.15, ease: "easeOut" }}
-      className="flex flex-col gap-[2.4vh] px-[2.4vh] py-[2vh]"
+      className="flex flex-col gap-[2vh] pb-[1vh] pr-[1.6vh]"
     >
       {BODIES[tab]()}
     </motion.div>

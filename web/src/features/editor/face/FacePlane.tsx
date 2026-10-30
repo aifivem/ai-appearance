@@ -55,7 +55,7 @@ export function FacePlane({ plane }: { plane: FacePlaneConfig }) {
   return (
     <div className="grid grid-cols-[1.4vh_minmax(0,1fr)_1.4vh] gap-[0.4vh]">
       <div className="col-start-2 flex items-baseline justify-between pb-[0.4vh] text-[1.3vh]">
-        <span className="font-medium text-text">{t(`FACE_PLANE_${plane.key}`)}</span>
+        <span className="font-medium text-white/90">{t(`FACE_PLANE_${plane.key}`)}</span>
         <span className="tabular-nums text-text-3">
           {axisPosition(ratioX)} · {axisPosition(ratioY)}
         </span>
@@ -66,7 +66,7 @@ export function FacePlane({ plane }: { plane: FacePlaneConfig }) {
         role="group"
         tabIndex={0}
         aria-label={t(`FACE_PLANE_${plane.key}`)}
-        className="relative aspect-square w-full cursor-crosshair touch-none select-none rounded-[0.8vh] border border-line bg-bg transition-[border-color] duration-150 hover:border-line-strong"
+        className="relative aspect-square w-full cursor-crosshair touch-none select-none rounded-[1vh] border border-white/8 bg-white/3 transition-[border-color] duration-150 hover:border-white/20"
         onPointerDown={(event) => {
           focusCamera("face");
           rect.current = plot.current?.getBoundingClientRect() ?? null;
@@ -82,15 +82,15 @@ export function FacePlane({ plane }: { plane: FacePlaneConfig }) {
       >
         <div ref={plot} className="pointer-events-none absolute inset-[1.2vh]">
           {GRID_LINES.map((line) => (
-            <span key={`v${line}`} className="absolute inset-y-0 w-px bg-line" style={{ left: `${(line / 6) * 100}%` }} />
+            <span key={`v${line}`} className="absolute inset-y-0 w-px bg-white/6" style={{ left: `${(line / 6) * 100}%` }} />
           ))}
           {GRID_LINES.map((line) => (
-            <span key={`h${line}`} className="absolute inset-x-0 h-px bg-line" style={{ top: `${(line / 6) * 100}%` }} />
+            <span key={`h${line}`} className="absolute inset-x-0 h-px bg-white/6" style={{ top: `${(line / 6) * 100}%` }} />
           ))}
-          <span className="absolute inset-y-0 left-1/2 w-px bg-line-strong" />
-          <span className="absolute inset-x-0 top-1/2 h-px bg-line-strong" />
+          <span className="absolute inset-y-0 left-1/2 w-px bg-white/15" />
+          <span className="absolute inset-x-0 top-1/2 h-px bg-white/15" />
           <span
-            className="absolute size-[1.6vh] rounded-full bg-accent [box-shadow:0_0_0_0.4vh_rgba(var(--accent-rgb),0.2)] [transform:translate(-50%,-50%)]"
+            className="absolute size-[1.6vh] rounded-full bg-tgi-green [box-shadow:0_0_0_0.4vh_var(--green-20)] [transform:translate(-50%,-50%)]"
             style={{ left: `${ratioX * 100}%`, top: `${(1 - ratioY) * 100}%` }}
           />
         </div>

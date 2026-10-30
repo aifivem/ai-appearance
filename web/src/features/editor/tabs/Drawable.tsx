@@ -1,5 +1,5 @@
 import type { CameraZone } from "../../../../../resource/common/nui";
-import { Stepper } from "../../../components/controls";
+import { PAIR_GRID, Stepper } from "../../../components/controls";
 import { useLang } from "../../../lib/lang";
 import { useAppDispatch, useAppSelector } from "../../../store";
 import { drawableSet } from "../../../store/editor";
@@ -32,7 +32,7 @@ export function DrawableControl({ kind, id, label, zone }: Props) {
   };
 
   return (
-    <div className="flex flex-col gap-[1.2vh]">
+    <div className={PAIR_GRID}>
       <Stepper
         label={label}
         position={position}

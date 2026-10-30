@@ -17,12 +17,12 @@ function Portrait({ parent, selected, onPick }: { parent: Parent; selected: bool
       title={parent.name}
       onClick={onPick}
       className={cn(
-        "flex aspect-square overflow-hidden rounded-[0.6vh] border bg-raised transition-[border-color,box-shadow] duration-150 active:[transform:scale(0.96)]",
-        selected ? "border-accent [box-shadow:0_0_1.2vh_rgba(var(--accent-rgb),0.18)]" : "border-line hover:border-line-strong",
+        "flex aspect-square overflow-hidden rounded-[1vh] border transition-[border-color,background-color] duration-150 active:[transform:scale(0.96)]",
+        selected ? "border-tgi-green bg-tgi-green-10" : "border-white/8 bg-white/3 hover:bg-white/6",
       )}
     >
       {broken ? (
-        <span className="m-auto text-[1.4vh] font-semibold text-text-3">{parent.name.slice(0, 2)}</span>
+        <span className="m-auto text-[1.4vh] font-semibold text-text-2">{parent.name.slice(0, 2)}</span>
       ) : (
         <img src={`https://nui-img/${parent.image}`} alt="" className="size-full object-cover" onError={() => setBroken(true)} />
       )}
@@ -40,10 +40,10 @@ interface GridProps {
 function ParentGrid({ title, parents, value, onPick }: GridProps) {
   const name = parents.find((p) => p.id === value)?.name ?? "";
   return (
-    <section className="flex flex-col gap-[1.2vh]">
-      <h3 className="flex justify-between text-[1.2vh] font-medium uppercase tracking-[0.24em] text-text-3">
-        {title}
-        <span className="normal-case tracking-normal text-text">{name}</span>
+    <section className="flex flex-col gap-[1.4vh] border-b border-white/10 pb-[2vh]">
+      <h3 className="flex items-baseline justify-between gap-[1vh]">
+        <span className="font-display font-extrabold text-[1.6vh] uppercase leading-none tracking-[-0.01em]">{title}</span>
+        <span className="truncate text-[1.4vh] text-tgi-green">{name}</span>
       </h3>
       <div role="radiogroup" aria-label={title} className="grid grid-cols-6 gap-[0.8vh]">
         {parents.map((parent) => (
