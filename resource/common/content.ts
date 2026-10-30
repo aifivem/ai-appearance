@@ -1,4 +1,13 @@
-import { bool, int, num, record, vec4, type Vec4, readPlacePed, type PlacePed } from "@aicore-fivem/lib/shared";
+import {
+  bool,
+  int,
+  num,
+  record,
+  vec4,
+  type Vec4,
+  readPlacePed,
+  type PlacePed,
+} from "@aicore-fivem/lib/shared";
 import type { ShopType } from "./pricing";
 
 /** Panel content (`data/settings.json`, `data/shops.json`): the server reads it from its admin panel store, clients from the world mirror. */

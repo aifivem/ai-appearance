@@ -1,5 +1,6 @@
 import {
   cache,
+  hud,
   loadLocaleTexts,
   player,
   triggerServerCallback,
@@ -120,7 +121,7 @@ class Editor {
         done,
       };
       FreezeEntityPosition(ped, true);
-      DisplayRadar(false);
+      hud.hide("editor");
       this.camera.start(ped, mode === "clothing" ? "body" : "face");
       SetNuiFocus(true, true);
       SendNUIMessage({ action: NuiMessage.open, data });
@@ -193,7 +194,7 @@ class Editor {
     SendNUIMessage({ action: NuiMessage.close });
     this.camera.stop();
     player.freeze(false);
-    DisplayRadar(true);
+    hud.show("editor");
     if (s.mode === "creator")
       SetStreamedTextureDictAsNoLongerNeeded(PORTRAIT_DICT);
     s.done(saved);
