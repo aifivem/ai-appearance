@@ -1,17 +1,29 @@
 {
+  "$schema": "./schemas/settings.schema.json",
   "creator": {
     "x": -795.57,
     "y": 331.79,
     "z": 200.42,
-    "heading": 270.0
+    "heading": 270
   },
   "prices": {
     "clothing": 50,
     "barber": 100
   },
-  "accounts": ["cash", "bank"],
+  "accounts": [
+    "cash",
+    "bank"
+  ],
   "blips": {
-    "clothing": { "sprite": 73, "color": 47, "scale": 0.7 },
-    "barber": { "sprite": 71, "color": 47, "scale": 0.7 }
+    "clothing": {
+      "sprite": 73,
+      "color": 47,
+      "scale": 0.7
+    },
+    "barber": {
+      "sprite": 71,
+      "color": 47,
+      "scale": 0.7
+    }
   }
 }

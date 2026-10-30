@@ -1,0 +1,62 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "ai-appearance/data/shops.json",
+  "type": "object",
+  "properties": {
+    "$schema": {
+      "type": "string",
+      "description": "This file's JSON Schema (for editors)."
+    }
+  },
+  "patternProperties": {
+    "^[a-z0-9_]{2,32}$": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "description": "Type",
+          "enum": [
+            "clothing",
+            "barber"
+          ]
+        },
+        "coords": {
+          "description": "Centre of the store: Also where the map blip sits.",
+          "type": "object",
+          "required": [
+            "x",
+            "y",
+            "z"
+          ],
+          "properties": {
+            "x": {
+              "type": "number"
+            },
+            "y": {
+              "type": "number"
+            },
+            "z": {
+              "type": "number"
+            }
+          }
+        },
+        "radius": {
+          "description": "Radius: How far from the centre the store can be opened.",
+          "type": "number",
+          "minimum": 1,
+          "maximum": 30
+        },
+        "blip": {
+          "description": "Show on the map",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "type",
+        "coords",
+        "radius",
+        "blip"
+      ]
+    }
+  },
+  "additionalProperties": false
+}

@@ -1,0 +1,138 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "ai-appearance/data/settings.json",
+  "type": "object",
+  "properties": {
+    "$schema": {
+      "type": "string",
+      "description": "This file's JSON Schema (for editors)."
+    },
+    "creator": {
+      "description": "Where the character stands: Stand on the spot facing the way the character should face, then use your position.",
+      "type": "object",
+      "required": [
+        "x",
+        "y",
+        "z",
+        "heading"
+      ],
+      "properties": {
+        "x": {
+          "type": "number"
+        },
+        "y": {
+          "type": "number"
+        },
+        "z": {
+          "type": "number"
+        },
+        "heading": {
+          "type": "number"
+        }
+      }
+    },
+    "prices": {
+      "type": "object",
+      "properties": {
+        "clothing": {
+          "description": "Clothing, per changed item: A new top, pants and shoes is three items.",
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 1000000
+        },
+        "barber": {
+          "description": "Barber, per visit: Charged once when anything changes.",
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 1000000
+        }
+      },
+      "required": [
+        "clothing",
+        "barber"
+      ]
+    },
+    "accounts": {
+      "description": "Paid from: Money accounts tried in order until one has enough, e.g. cash then bank.",
+      "type": "array",
+      "maxItems": 5,
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "maxLength": 32,
+        "pattern": "^[a-z0-9_]{2,32}$"
+      }
+    },
+    "blips": {
+      "type": "object",
+      "properties": {
+        "clothing": {
+          "type": "object",
+          "properties": {
+            "sprite": {
+              "description": "Icon number: GTA blip id, see docs.fivem.net blips list.",
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 1000
+            },
+            "color": {
+              "description": "Colour number",
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 100
+            },
+            "scale": {
+              "description": "Size",
+              "type": "number",
+              "minimum": 0.1,
+              "maximum": 2
+            }
+          },
+          "required": [
+            "sprite",
+            "color",
+            "scale"
+          ]
+        },
+        "barber": {
+          "type": "object",
+          "properties": {
+            "sprite": {
+              "description": "Icon number: GTA blip id, see docs.fivem.net blips list.",
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 1000
+            },
+            "color": {
+              "description": "Colour number",
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 100
+            },
+            "scale": {
+              "description": "Size",
+              "type": "number",
+              "minimum": 0.1,
+              "maximum": 2
+            }
+          },
+          "required": [
+            "sprite",
+            "color",
+            "scale"
+          ]
+        }
+      },
+      "required": [
+        "clothing",
+        "barber"
+      ]
+    }
+  },
+  "required": [
+    "creator",
+    "prices",
+    "accounts",
+    "blips"
+  ]
+}
