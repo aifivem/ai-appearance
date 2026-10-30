@@ -1,11 +1,4 @@
-import {
-  bool,
-  int,
-  num,
-  record,
-  vec4,
-  type Vec4,
-} from "@aicore-fivem/lib/shared";
+import { bool, int, num, record, vec4, type Vec4, readPlacePed, type PlacePed } from "@aicore-fivem/lib/shared";
 import type { ShopType } from "./pricing";
 
 /** Panel content (`data/settings.json`, `data/shops.json`): the server reads it from its admin panel store, clients from the world mirror. */
@@ -13,6 +6,8 @@ import type { ShopType } from "./pricing";
 export type { ShopType };
 
 export interface Shop {
+  /** NPC standing at the place (panel), null for none. */
+  ped: PlacePed | null;
   id: string;
   type: ShopType;
   x: number;
@@ -95,6 +90,7 @@ export function readShops(raw: unknown): Map<string, Shop> {
       z: num(c.z, 0),
       radius: num(v.radius, 5, 1, 30),
       blip: bool(v.blip, true),
+      ped: readPlacePed(v.ped),
     });
   }
   return shops;

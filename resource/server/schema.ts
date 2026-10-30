@@ -1,3 +1,4 @@
+import { PLACE_PED_SPEC, placePedFields } from "@aicore-fivem/lib/shared";
 import type { DataSpec, PanelSchema, WidgetSpec } from "@aicore-fivem/shared";
 
 /** ai-appearance's panel: the creator room, prices, pay accounts, blips and the store locations. */
@@ -75,6 +76,7 @@ export const appearanceSchema: PanelSchema = {
         blip: true,
       },
       sections: {
+        ped: PLACE_PED_SPEC,
         type: { type: "enum", values: ["clothing", "barber"] },
         coords: { type: "vec3" },
         radius: { type: "number", min: 1, max: 30 },
@@ -125,6 +127,12 @@ export const appearanceSchema: PanelSchema = {
             },
             { widget: "switch", path: "blip", label: "ADMIN_F_SHOP_BLIP" },
           ],
+        },
+        {
+          icon: "user",
+          title: "ADMIN_C_PED",
+          desc: "ADMIN_C_PED_DESC",
+          fields: placePedFields(),
         },
       ],
     },

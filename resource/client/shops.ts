@@ -28,6 +28,7 @@ function rebuild(): void {
   points.clear();
   for (const shop of content.shops.values()) {
     points.add(shop.id, {
+      ped: shop.ped ?? undefined,
       coords: { x: shop.x, y: shop.y, z: shop.z },
       label: Locale(PROMPT[shop.type]),
       icon: ICON[shop.type],
