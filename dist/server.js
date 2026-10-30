@@ -800,7 +800,10 @@ var AdminPanel = class {
 	constructor(schema) {
 		this.schema = schema;
 		for (let [name, spec] of Object.entries(schema.files)) this.load(name, spec);
-		registerExport("AdminPanelSnapshot", () => this.snapshot()), registerExport("AdminPanelApply", (admin, patch) => this.apply(admin, patch)), onClientCallback(ADMIN.worldChangesCallback(this.resource), () => Object.fromEntries(this.worldChanges)), setImmediate(() => core$14.RegisterAdminPanel(this.resource));
+		registerExport("AdminPanelSnapshot", () => this.snapshot()), registerExport("AdminPanelApply", (admin, patch) => this.apply(admin, patch)), onClientCallback(ADMIN.worldChangesCallback(this.resource), () => Object.fromEntries(this.worldChanges), { rate: {
+			count: 4,
+			windowMs: 1e4
+		} }), setImmediate(() => core$14.RegisterAdminPanel(this.resource));
 	}
 	get(file) {
 		return this.data.get(file) ?? {};
@@ -15416,8 +15419,9 @@ var Group = class {
 	get front() {
 		return this.dues[this.head] ?? 0;
 	}
+	compactAt = 64;
 	push(job, due) {
-		this.count > this.mask && this.grow();
+		this.count >= this.compactAt && this.compact(), this.count > this.mask && this.grow();
 		let i = this.head + this.count & this.mask;
 		this.jobs[i] = job, this.gens[i] = job.gen, this.dues[i] = due, this.count++;
 	}
@@ -15430,6 +15434,17 @@ var Group = class {
 			let next = due + this.interval;
 			next <= now && (next = now + this.interval), this.push(job, next), job.call();
 		}
+	}
+	compact() {
+		let kept = 0;
+		for (let n = 0; n < this.count; n++) {
+			let i = this.head + n & this.mask, job = this.jobs[i];
+			if (!job || job.gen !== this.gens[i]) continue;
+			let k = this.head + kept & this.mask;
+			this.jobs[k] = job, this.gens[k] = this.gens[i] ?? 0, this.dues[k] = this.dues[i] ?? 0, kept++;
+		}
+		for (let n = kept; n < this.count; n++) this.jobs[this.head + n & this.mask] = void 0;
+		this.count = kept, this.compactAt = Math.max(64, kept * 2);
 	}
 	grow() {
 		let size = (this.mask + 1) * 2, jobs = Array(size), gens = Array(size).fill(0), dues = Array(size).fill(0);
@@ -15475,7 +15490,13 @@ new class {
 		}
 		groups.length = kept, this.nextDue = soonest;
 	};
-}(), IsDuplicityVersion(), resourceExport(CORE.resource), resourceExport(CORE.resource), resourceExport(CORE.resource), resourceExport(CORE.resource), resourceExport(CORE.resource), resourceExport(CORE.resource), resourceExport(CORE.resource), resourceExport(CORE.resource), resourceExport(CORE.resource);
+}(), IsDuplicityVersion(), resourceExport(CORE.resource), resourceExport(CORE.resource), resourceExport(CORE.resource), resourceExport(CORE.resource);
+// ../../../packages/lib/src/server/buckets.ts
+const core$5 = resourceExport(CORE.resource), buckets = {
+	acquire: (tag) => core$5.AcquireBucket(tag),
+	release: (id) => core$5.ReleaseBucket(id)
+};
+resourceExport(CORE.resource), resourceExport(CORE.resource), resourceExport(CORE.resource), resourceExport(CORE.resource);
 // resource/common/appearance.ts
 const MODELS = {
 	male: "mp_m_freemode_01",
@@ -15946,10 +15967,15 @@ var Wearer = class {
 		this.charId = charId, this.sex = sex, this.appearance = appearance, this.creating = creating;
 	}
 };
-const wearers = new PlayerMap(), core = resourceExport("ai-core"), BUSY = fail("APPEARANCE_ERR_BUSY");
+const wearers = new PlayerMap(), core = resourceExport("ai-core"), BUSY = fail("APPEARANCE_ERR_BUSY"), creatorBuckets = new PlayerMap({ onDrop: (_source, bucket) => buckets.release(bucket) });
 function enterCreatorBucket(source) {
-	let bucket = 6e4 + source;
-	SetRoutingBucketPopulationEnabled(bucket, !1), SetRoutingBucketEntityLockdownMode(bucket, "strict"), SetPlayerRoutingBucket(String(source), bucket);
+	leaveCreatorBucket(source);
+	let bucket = buckets.acquire("creator");
+	creatorBuckets.set(source, bucket), SetRoutingBucketPopulationEnabled(bucket, !1), SetRoutingBucketEntityLockdownMode(bucket, "strict"), SetPlayerRoutingBucket(String(source), bucket);
+}
+function leaveCreatorBucket(source, move = !0) {
+	let bucket = creatorBuckets.get(source);
+	bucket !== void 0 && (creatorBuckets.delete(source), move && SetPlayerRoutingBucket(String(source), 0), buckets.release(bucket));
 }
 async function dress(source, character) {
 	await tablesReady;
@@ -15964,7 +15990,9 @@ async function dress(source, character) {
 }
 onCharacter({
 	loaded: (source, character) => dress(source, character).catch((error) => log.error(`loading the look of character ${character.id} failed`, error)),
-	unloaded: (source) => wearers.delete(source)
+	unloaded: (source) => {
+		wearers.delete(source), leaveCreatorBucket(source, !1);
+	}
 }), on(CORE.characterScreenEvent, (source, charIds) => {
 	loadAppearances(charIds).then((looks) => {
 		let list = [...looks].map(([id, appearance]) => ({
@@ -15978,7 +16006,7 @@ onCharacter({
 	lock: !0
 }, async (source, appearance) => {
 	let wearer = wearers.get(source);
-	return wearer?.creating ? appearance.model === MODELS[wearer.sex] ? (await saveAppearance(wearer.charId, appearance), wearer.appearance = appearance, wearer.creating = !1, SetPlayerRoutingBucket(String(source), 0), { ok: !0 }) : fail("APPEARANCE_ERR_INVALID") : BUSY;
+	return wearer?.creating ? appearance.model === MODELS[wearer.sex] ? (await saveAppearance(wearer.charId, appearance), wearer.appearance = appearance, wearer.creating = !1, leaveCreatorBucket(source), { ok: !0 }) : fail("APPEARANCE_ERR_INVALID") : BUSY;
 });
 function pay(source, price, reason) {
 	return price <= 0 || content.settings.accounts.some((account) => core.RemoveMoney(source, account, price, reason));

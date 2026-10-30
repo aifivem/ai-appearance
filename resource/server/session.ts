@@ -1,8 +1,10 @@
 import { asArgs, fail, readText } from "@aicore-fivem/lib/shared";
 import {
   aiLog,
+  buckets,
   onCharacter,
   onClientCallback,
+  PlayerMap,
   resourceExport,
 } from "@aicore-fivem/lib/server";
 import { CORE, type CharacterInfo } from "@aicore-fivem/shared";
@@ -17,14 +19,27 @@ import { Wearer, wearers } from "./wearers";
 
 const core = resourceExport("ai-core");
 const BUSY = fail("APPEARANCE_ERR_BUSY");
-/** Private routing bucket of the creator, one per player (ai-core's character screen uses 50000+). */
-const CREATOR_BUCKET_BASE = 60_000;
+/** The creator's private routing bucket per player, from ai-core's allocator (given back on save, unload or drop). */
+const creatorBuckets = new PlayerMap<number>({
+  onDrop: (_source, bucket) => buckets.release(bucket),
+});
 
 function enterCreatorBucket(source: number): void {
-  const bucket = CREATOR_BUCKET_BASE + source;
+  leaveCreatorBucket(source);
+  const bucket = buckets.acquire("creator");
+  creatorBuckets.set(source, bucket);
   SetRoutingBucketPopulationEnabled(bucket, false);
   SetRoutingBucketEntityLockdownMode(bucket, "strict");
   SetPlayerRoutingBucket(String(source), bucket);
+}
+
+/** `move`: the player goes back to the shared world (not on unload: ai-core puts them in the character screen's). */
+function leaveCreatorBucket(source: number, move = true): void {
+  const bucket = creatorBuckets.get(source);
+  if (bucket === undefined) return;
+  creatorBuckets.delete(source);
+  if (move) SetPlayerRoutingBucket(String(source), 0);
+  buckets.release(bucket);
 }
 
 /** Loads the character's look and dresses the player, or sends a new character to the creator. */
@@ -49,7 +64,10 @@ onCharacter({
     dress(source, character).catch((error: unknown) =>
       log.error(`loading the look of character ${character.id} failed`, error),
     ),
-  unloaded: (source) => wearers.delete(source),
+  unloaded: (source) => {
+    wearers.delete(source);
+    leaveCreatorBucket(source, false);
+  },
 });
 
 /** The character screen loaded: the cards' looks go to the client, which turns them into portraits. */
@@ -84,7 +102,7 @@ onClientCallback(
     await saveAppearance(wearer.charId, appearance);
     wearer.appearance = appearance;
     wearer.creating = false;
-    SetPlayerRoutingBucket(String(source), 0);
+    leaveCreatorBucket(source);
     return { ok: true };
   },
 );
