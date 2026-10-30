@@ -82,7 +82,7 @@
             },
             "scale": {
               "type": "number",
-              "minimum": 0.1,
+              "minimum": 0.3,
               "maximum": 2
             }
           },
@@ -108,7 +108,7 @@
             },
             "scale": {
               "type": "number",
-              "minimum": 0.1,
+              "minimum": 0.3,
               "maximum": 2
             }
           },

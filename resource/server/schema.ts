@@ -1,15 +1,16 @@
-import { PLACE_PED_SPEC, placePedFields, spec } from "@aicore-fivem/lib/shared";
+import {
+  BLIP_STYLE_FIELDS,
+  PLACE_PED_SPEC,
+  placePedFields,
+  spec,
+} from "@aicore-fivem/lib/shared";
 import type { DataSpec, PanelSchema } from "@aicore-fivem/shared";
 
 /** ai-appearance's panel: the creator room, prices, pay accounts, blips and the store locations. */
 
 const blip: DataSpec = {
   type: "object",
-  fields: {
-    sprite: spec.int(0, 1000),
-    color: spec.int(0, 100),
-    scale: { type: "number", min: 0.1, max: 2 },
-  },
+  fields: BLIP_STYLE_FIELDS,
 };
 export const appearanceSchema: PanelSchema = {
   title: "ADMIN_APPEARANCE_TITLE",

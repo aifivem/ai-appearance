@@ -67,7 +67,35 @@ function readText(value, max) {
 const fail = (error) => ({
 	ok: !1,
 	error
-}), isObject = (value) => typeof value == "object" && !!value && !Array.isArray(value);
+}), BLIP_STYLE_FIELDS = {
+	sprite: {
+		type: "number",
+		min: 0,
+		max: 1e3,
+		integer: !0
+	},
+	color: {
+		type: "number",
+		min: 0,
+		max: 100,
+		integer: !0
+	},
+	scale: {
+		type: "number",
+		min: .3,
+		max: 2
+	}
+};
+function readBlipStyle(value, fallback) {
+	let v = record(value);
+	return {
+		sprite: int(v.sprite, fallback.sprite, 0, 1e3),
+		color: int(v.color, fallback.color, 0, 100),
+		scale: num(v.scale, fallback.scale, .3, 2)
+	};
+}
+// ../../../packages/lib/src/shared/records.ts
+const isObject = (value) => typeof value == "object" && !!value && !Array.isArray(value);
 function readRecords(raw, readOne) {
 	let out = new Map();
 	if (!isObject(raw)) return out;
@@ -994,6 +1022,10 @@ var OnlinePlayers = class {
 	}
 	character(source) {
 		return this.start(), this.players.get(source)?.character ?? null;
+	}
+	name(source, options = {}) {
+		let c = this.character(source);
+		return c ? `${c.firstname} ${c.lastname}` : options.fallback === !1 ? "" : GetPlayerName(String(source));
 	}
 	jobs(source) {
 		return this.start(), this.players.get(source)?.jobNames ?? [];
@@ -15619,14 +15651,11 @@ function toAppearance(value) {
 		props
 	};
 }
-const sameDrawable = (a, b) => a?.collection === b?.collection && a?.index === b?.index && a?.texture === b?.texture, sameOverlay = (a, b) => a?.value === b?.value && a?.opacity === b?.opacity && a?.color1 === b?.color1 && a?.color2 === b?.color2, blip$1 = (value, sprite) => {
-	let v = record(value);
-	return {
-		sprite: int(v.sprite, sprite, 0, 1e3),
-		color: int(v.color, 47, 0, 100),
-		scale: num(v.scale, .7, .1, 2)
-	};
-};
+const sameDrawable = (a, b) => a?.collection === b?.collection && a?.index === b?.index && a?.texture === b?.texture, sameOverlay = (a, b) => a?.value === b?.value && a?.opacity === b?.opacity && a?.color1 === b?.color1 && a?.color2 === b?.color2, blip$1 = (value, sprite) => readBlipStyle(record(value), {
+	sprite,
+	color: 47,
+	scale: .7
+});
 function readSettings(raw) {
 	let s = record(raw), prices = record(s.prices), blips = record(s.blips), accounts = Array.isArray(s.accounts) ? s.accounts.filter((a) => typeof a == "string" && /^[a-z0-9_]{2,32}$/.test(a)) : [];
 	return {
@@ -15734,15 +15763,7 @@ IsDuplicityVersion();
 // resource/server/log.ts
 const log = createLogger(ResourceName), blip = {
 	type: "object",
-	fields: {
-		sprite: spec.int(0, 1e3),
-		color: spec.int(0, 100),
-		scale: {
-			type: "number",
-			min: .1,
-			max: 2
-		}
-	}
+	fields: BLIP_STYLE_FIELDS
 }, content = new AppearanceContent(new AdminPanel({
 	title: "ADMIN_APPEARANCE_TITLE",
 	icon: "shirt",

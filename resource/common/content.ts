@@ -2,11 +2,12 @@ import {
   bool,
   int,
   num,
+  type PlacePed,
+  readBlipStyle,
+  readPlacePed,
   record,
   vec4,
   type Vec4,
-  readPlacePed,
-  type PlacePed,
 } from "@aicore-fivem/lib/shared";
 import type { ShopType } from "./pricing";
 
@@ -45,11 +46,7 @@ export interface Settings {
 
 const blip = (value: unknown, sprite: number): BlipStyle => {
   const v = record(value);
-  return {
-    sprite: int(v.sprite, sprite, 0, 1000),
-    color: int(v.color, 47, 0, 100),
-    scale: num(v.scale, 0.7, 0.1, 2),
-  };
+  return readBlipStyle(v, { sprite: sprite, color: 47, scale: 0.7 });
 };
 
 export function readSettings(raw: unknown): Settings {
