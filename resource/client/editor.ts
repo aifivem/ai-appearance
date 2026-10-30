@@ -5,7 +5,7 @@ import {
   player,
   triggerServerCallback,
 } from "@aicore-fivem/lib/client";
-import { isRecord } from "@aicore-fivem/lib/shared";
+import { fail, isRecord, replyError } from "@aicore-fivem/lib/shared";
 import {
   CLOTHING_COMPONENTS,
   HAIR_COMPONENT,
@@ -31,10 +31,7 @@ import { content } from "./content";
 import { look } from "./look";
 import { applyChanges } from "./skin";
 
-const BUSY = {
-  ok: false,
-  error: "APPEARANCE_ERR_BUSY",
-} as const satisfies SaveResult;
+const BUSY = fail("APPEARANCE_ERR_BUSY");
 const ZONES: readonly string[] = [
   "face",
   "head",
@@ -161,14 +158,9 @@ class Editor {
       s.mode === "creator" ? EVENTS.saveCreator : EVENTS.saveShop,
       args,
     ).catch(() => null);
-    if (!isRecord(answer) || answer.ok !== true)
-      return {
-        ok: false,
-        error:
-          isRecord(answer) && typeof answer.error === "string"
-            ? answer.error
-            : BUSY.error,
-      };
+    // The editor shows the refusal itself (callAction would notify it).
+    const error = replyError(answer, BUSY.error);
+    if (error !== null) return fail(error);
     const stored =
       s.mode === "creator"
         ? s.worn

@@ -1,5 +1,5 @@
 import { PLACE_PED_SPEC, placePedFields } from "@aicore-fivem/lib/shared";
-import type { DataSpec, PanelSchema, WidgetSpec } from "@aicore-fivem/shared";
+import type { DataSpec, PanelSchema } from "@aicore-fivem/shared";
 
 /** ai-appearance's panel: the creator room, prices, pay accounts, blips and the store locations. */
 
@@ -17,32 +17,6 @@ const blip: DataSpec = {
     scale: { type: "number", min: 0.1, max: 2 },
   },
 };
-const blipFields = (kind: "clothing" | "barber"): WidgetSpec[] => [
-  {
-    widget: "number",
-    path: `blips.${kind}.sprite`,
-    label: "ADMIN_F_BLIP_SPRITE",
-    hint: "ADMIN_H_BLIP_SPRITE",
-    min: 0,
-    max: 1000,
-  },
-  {
-    widget: "number",
-    path: `blips.${kind}.color`,
-    label: "ADMIN_F_BLIP_COLOR",
-    min: 0,
-    max: 100,
-  },
-  {
-    widget: "number",
-    path: `blips.${kind}.scale`,
-    label: "ADMIN_F_BLIP_SCALE",
-    min: 0.1,
-    max: 2,
-    step: 0.1,
-  },
-];
-
 export const appearanceSchema: PanelSchema = {
   title: "ADMIN_APPEARANCE_TITLE",
   icon: "shirt",
@@ -194,12 +168,24 @@ export const appearanceSchema: PanelSchema = {
         {
           icon: "shirt",
           title: "ADMIN_C_BLIP_CLOTHING",
-          fields: blipFields("clothing"),
+          fields: [
+            {
+              widget: "blip",
+              path: "blips.clothing",
+              label: "ADMIN_F_BLIP_STYLE",
+            },
+          ],
         },
         {
           icon: "scissors",
           title: "ADMIN_C_BLIP_BARBER",
-          fields: blipFields("barber"),
+          fields: [
+            {
+              widget: "blip",
+              path: "blips.barber",
+              label: "ADMIN_F_BLIP_STYLE",
+            },
+          ],
         },
       ],
     },

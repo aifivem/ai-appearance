@@ -1,3 +1,5 @@
+import type { ActionResult } from "@aicore-fivem/shared";
+
 /** Net events and callbacks of ai-appearance (payload types in ./appearance). */
 export const EVENTS = {
   /** Server -> client: (appearance: Appearance) the loaded character's look. */
@@ -12,4 +14,4 @@ export const EVENTS = {
   saveShop: "ai-appearance:saveShop",
 } as const;
 
-export type SaveResult = { ok: true } | { ok: false; error: string };
+export type SaveResult = ActionResult;

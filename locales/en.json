@@ -140,8 +140,5 @@
   "ADMIN_PH_ACCOUNT_KEY": "type an account key and press Enter",
   "ADMIN_C_BLIP_CLOTHING": "Clothing store blip",
   "ADMIN_C_BLIP_BARBER": "Barber shop blip",
-  "ADMIN_F_BLIP_SPRITE": "Icon number",
-  "ADMIN_H_BLIP_SPRITE": "GTA blip id, see docs.fivem.net blips list.",
-  "ADMIN_F_BLIP_COLOR": "Colour number",
-  "ADMIN_F_BLIP_SCALE": "Size"
+  "ADMIN_F_BLIP_STYLE": "Blip look"
 }

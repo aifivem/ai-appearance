@@ -1,3 +1,4 @@
+import { PlayerMap } from "@aicore-fivem/lib/server";
 import type { Sex } from "@aicore-fivem/shared";
 import type { Appearance } from "common/appearance";
 
@@ -11,21 +12,5 @@ export class Wearer {
   ) {}
 }
 
-/** Looks of every player with a loaded character, by server id. */
-class WearerRegistry {
-  private readonly bySource = new Map<number, Wearer>();
-
-  get(source: number): Wearer | undefined {
-    return this.bySource.get(source);
-  }
-
-  set(source: number, wearer: Wearer): void {
-    this.bySource.set(source, wearer);
-  }
-
-  delete(source: number): void {
-    this.bySource.delete(source);
-  }
-}
-
-export const wearers = new WearerRegistry();
+/** Looks of every player with a loaded character, by server id (freed on unload and drop). */
+export const wearers = new PlayerMap<Wearer>();

@@ -1,13 +1,9 @@
-import {
-  cache,
-  onServerEvent,
-  registerExport,
-  requestModel,
-} from "@aicore-fivem/lib/client";
+import { cache, onServerEvent, requestModel } from "@aicore-fivem/lib/client";
 import {
   asArgs,
   createLogger,
   isRecord,
+  readId,
   sleep,
   waitFor,
 } from "@aicore-fivem/lib/shared";
@@ -99,25 +95,6 @@ class Portraits {
 }
 
 const portraits = new Portraits();
-/** Looks of the character screen's cards by character id, for ai-core's scene peds; kept until a character spawns. */
-const screenLooks = new Map<number, Appearance>();
-
-registerExport(
-  "ApplyCharacterAppearance",
-  (ped: unknown, charId: unknown): boolean => {
-    const look =
-      typeof charId === "number" ? screenLooks.get(charId) : undefined;
-    if (
-      !look ||
-      typeof ped !== "number" ||
-      !DoesEntityExist(ped) ||
-      GetEntityModel(ped) !== GetHashKey(look.model)
-    )
-      return false;
-    applyAppearance(ped, look);
-    return true;
-  },
-);
 
 /** Cards of the character screen: only entries with a numeric id and a valid look pass. */
 function toPortraitList(
@@ -125,28 +102,19 @@ function toPortraitList(
 ): Array<{ id: number; appearance: Appearance }> | null {
   if (!Array.isArray(raw)) return null;
   return raw.flatMap((entry: unknown) => {
-    if (!isRecord(entry) || typeof entry.id !== "number") return [];
-    const appearance = toAppearance(entry.appearance);
-    return appearance ? [{ id: entry.id, appearance }] : [];
+    const id = isRecord(entry) ? readId(entry.id) : null;
+    const appearance = isRecord(entry) ? toAppearance(entry.appearance) : null;
+    return id !== null && appearance ? [{ id, appearance }] : [];
   });
 }
 
 onServerEvent(
   EVENTS.portraits,
   { args: ([raw]) => asArgs(toPortraitList(raw)) },
-  (list) => {
-    for (const { id, appearance } of list) {
-      screenLooks.set(id, appearance);
-      emit(CORE.clientCharacterLookEvent, id);
-    }
-    portraits.request(list);
-  },
+  (list) => portraits.request(list),
 );
 
-on(CORE.clientPlayerLoadedEvent, () => {
-  portraits.clear();
-  screenLooks.clear();
-});
+on(CORE.clientPlayerLoadedEvent, () => portraits.clear());
 on("onResourceStop", (resource: string) => {
   if (resource === ResourceName) portraits.clear();
 });

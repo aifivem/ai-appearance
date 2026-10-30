@@ -36,7 +36,7 @@ var SourceLock = class {
 function num(value, fallback, min = -Infinity, max = Infinity) {
 	return typeof value == "number" && Number.isFinite(value) ? Math.min(max, Math.max(min, value)) : fallback;
 }
-function int$2(value, fallback, min = -Infinity, max = Infinity) {
+function int$1(value, fallback, min = -Infinity, max = Infinity) {
 	return Math.round(num(value, fallback, min, max));
 }
 function bool(value, fallback) {
@@ -54,8 +54,20 @@ function vec4(value, fallback) {
 		heading: num(v.heading, fallback.heading)
 	};
 }
-// ../../../packages/lib/src/shared/records.ts
-const isObject = (value) => typeof value == "object" && !!value && !Array.isArray(value);
+// ../../../packages/lib/src/shared/strict.ts
+function readInt(value, min, max) {
+	return Number.isInteger(value) && value >= min && value <= max ? value : null;
+}
+function readText(value, max) {
+	if (typeof value != "string") return null;
+	let text = value.trim();
+	return text ? text.slice(0, max) : null;
+}
+// ../../../packages/lib/src/shared/action.ts
+const fail = (error) => ({
+	ok: !1,
+	error
+}), isObject = (value) => typeof value == "object" && !!value && !Array.isArray(value);
 function readRecords(raw, readOne) {
 	let out = new Map();
 	if (!isObject(raw)) return out;
@@ -303,7 +315,7 @@ const CORE = {
 	clientPlayerLoadedEvent: "ai-core:client:playerLoaded",
 	clientPlayerUnloadedEvent: "ai-core:client:playerUnloaded",
 	clientCharacterPortraitEvent: "ai-core:client:characterPortrait",
-	clientCharacterLookEvent: "ai-core:client:characterLook",
+	characterLooksEvent: "ai-core:client:characterLooks",
 	clientPromptPressedEvent: "ai-core:client:promptPressed",
 	clientCacheEvent: "ai-core:client:cache",
 	clientHudVisibleEvent: "ai-core:client:hudVisible",
@@ -473,7 +485,7 @@ function toPatch(value) {
 		default: return null;
 	}
 }
-const clone = (value) => value === void 0 ? value : JSON.parse(JSON.stringify(value)), core$14 = resourceExport(CORE.resource), ERR = {
+const clone = (value) => value === void 0 ? value : JSON.parse(JSON.stringify(value)), core$15 = resourceExport(CORE.resource), ERR = {
 	type: "ADMIN_ERR_TYPE",
 	range: "ADMIN_ERR_RANGE",
 	length: "ADMIN_ERR_LENGTH",
@@ -487,7 +499,7 @@ const clone = (value) => value === void 0 ? value : JSON.parse(JSON.stringify(va
 		if (cached && Date.now() - cached.at < 2e3) return cached.values.size > 0 ? cached.values : null;
 		let list = [];
 		try {
-			list = core$14.GetLookupValues(source);
+			list = core$15.GetLookupValues(source);
 		} catch {}
 		let values = new Set(Array.isArray(list) ? list.filter((v) => typeof v == "string") : []);
 		return this.lists.set(source, {
@@ -690,7 +702,7 @@ function writeSchema(resource, name, text, log) {
 	(0, node_fs_promises.mkdir)(dir, { recursive: !0 }).then(() => (0, node_fs_promises.writeFile)(`${dir}/${name}.schema.json`, text, "utf8")).catch((error) => log.error(`writing ${resource}/${path} failed`, error));
 }
 // ../../../packages/lib/src/server/admin/panel.ts
-const core$13 = resourceExport(CORE.resource), DEFAULT_KEY = "^[a-z0-9_]{2,32}$";
+const core$14 = resourceExport(CORE.resource), DEFAULT_KEY = "^[a-z0-9_]{2,32}$";
 function imported(spec, value) {
 	let base = clone(spec.newRecord ?? {}), out = {};
 	for (let name of Object.keys(spec.sections)) {
@@ -714,7 +726,7 @@ var AdminPanel = class {
 	constructor(schema) {
 		this.schema = schema;
 		for (let [name, spec] of Object.entries(schema.files)) this.load(name, spec);
-		registerExport("AdminPanelSnapshot", () => this.snapshot()), registerExport("AdminPanelApply", (admin, patch) => this.apply(admin, patch)), onClientCallback(ADMIN.worldChangesCallback(this.resource), () => Object.fromEntries(this.worldChanges)), setImmediate(() => core$13.RegisterAdminPanel(this.resource));
+		registerExport("AdminPanelSnapshot", () => this.snapshot()), registerExport("AdminPanelApply", (admin, patch) => this.apply(admin, patch)), onClientCallback(ADMIN.worldChangesCallback(this.resource), () => Object.fromEntries(this.worldChanges)), setImmediate(() => core$14.RegisterAdminPanel(this.resource));
 	}
 	get(file) {
 		return this.data.get(file) ?? {};
@@ -848,7 +860,7 @@ var AdminPanel = class {
 		let spec = this.schema.files[file], data = this.get(file), value = key === void 0 ? data : data[key] ?? null;
 		this.dataFiles.get(file)?.write(data), this.views.changed(file, key, value);
 		for (let handler of this.handlers.get(file) ?? []) handler(key, value);
-		if (core$13.AdminPanelChanged({
+		if (core$14.AdminPanelChanged({
 			resource: this.resource,
 			file,
 			key,
@@ -878,7 +890,7 @@ function aiLogChannels(channels) {
 }
 resourceExport(CORE.resource);
 // ../../../packages/lib/src/server/online.ts
-const core$11 = resourceExport(CORE.resource);
+const core$12 = resourceExport(CORE.resource);
 var OnlinePlayers = class {
 	players = new Map();
 	onDuty = new Map();
@@ -887,7 +899,7 @@ var OnlinePlayers = class {
 		if (this.started) return;
 		this.started = !0;
 		let load = (source, character) => {
-			this.put(source, character, (core$11.GetJobs(source) ?? []).map((m) => m.job), (core$11.GetGangs(source) ?? []).map((m) => m.gang)), this.setDuty(source, core$11.GetDutyJob(source));
+			this.put(source, character, (core$12.GetJobs(source) ?? []).map((m) => m.job), (core$12.GetGangs(source) ?? []).map((m) => m.gang)), this.setDuty(source, core$12.GetDutyJob(source));
 		};
 		on(CORE.playerLoadedEvent, load), on(CORE.playerUnloadedEvent, (source) => this.drop(source)), on(CORE.jobsChangedEvent, (source, jobs) => {
 			let player = this.players.get(source);
@@ -896,8 +908,8 @@ var OnlinePlayers = class {
 			let player = this.players.get(source);
 			player && (player.gangs = gangs.map((m) => m.gang));
 		}), on(CORE.dutyChangedEvent, (source, job) => this.setDuty(source, job));
-		for (let source of core$11.GetLoadedSources()) {
-			let character = core$11.GetCharacter(source);
+		for (let source of core$12.GetLoadedSources()) {
+			let character = core$12.GetCharacter(source);
 			character && load(source, character);
 		}
 	}
@@ -940,8 +952,55 @@ var OnlinePlayers = class {
 		return this.start(), this.onDuty.get(job) ?? EMPTY;
 	}
 };
-const EMPTY = new Set();
-new OnlinePlayers(), resourceExport(CORE.resource), resourceExport(CORE.resource), createLogger(GetCurrentResourceName());
+const EMPTY = new Set(), online = new OnlinePlayers();
+resourceExport(CORE.resource), resourceExport(CORE.resource);
+// ../../../packages/lib/src/server/players.ts
+const log$4 = createLogger(GetCurrentResourceName()), dropped = new Set();
+let listening = !1;
+function onDropped(fn) {
+	listening || (listening = !0, on("playerDropped", () => {
+		let source = Number(globalThis.source);
+		for (let handler of dropped) handler(source);
+	})), dropped.add(fn);
+}
+var PlayerMap = class extends Map {
+	constructor(options = {}) {
+		super(), onDropped((source) => {
+			if (!this.has(source)) return;
+			let value = this.get(source);
+			this.delete(source), options.onDrop?.(source, value);
+		});
+	}
+};
+function onCharacter(handlers) {
+	let live = new Map(), deliver = (source, character) => {
+		if (live.set(source, character.id), handlers.loaded) try {
+			let result = handlers.loaded(source, character);
+			result instanceof Promise && result.catch((error) => log$4.error(`character loaded handler failed for ${source}`, error));
+		} catch (error) {
+			log$4.error(`character loaded handler failed for ${source}`, error);
+		}
+	}, end = (source, charId) => {
+		if (live.delete(source)) try {
+			handlers.unloaded?.(source, charId);
+		} catch (error) {
+			log$4.error(`character unloaded handler failed for ${source}`, error);
+		}
+	};
+	on(CORE.playerLoadedEvent, (source, character) => {
+		let previous = live.get(source);
+		previous !== void 0 && end(source, previous), deliver(source, character);
+	}), on(CORE.playerUnloadedEvent, (source, charId) => end(source, charId)), onDropped((source) => setImmediate(() => {
+		let charId = live.get(source);
+		charId !== void 0 && end(source, charId);
+	})), setImmediate(() => {
+		for (let source of online.sources()) {
+			if (live.has(source)) continue;
+			let character = online.character(source);
+			character && deliver(source, character);
+		}
+	});
+}
 // ../../../packages/lib/src/server/command.ts
 const resource$3 = GetCurrentResourceName();
 createLogger(resource$3), new class {
@@ -15266,12 +15325,9 @@ async function createDatabaseTables(resource, file) {
 		else for (let [name, definition] of statement.columns) columns.has(name) || (await mysql.query(`ALTER TABLE \`${statement.table}\` ADD COLUMN ${definition}`), log$1.info(`^2added column ${statement.table}.${name}^7 (${resource})`));
 	}
 }
-IsDuplicityVersion(), resourceExport(CORE.resource), resourceExport(CORE.resource), resourceExport(CORE.resource), resourceExport(CORE.resource), resourceExport(CORE.resource), resourceExport(CORE.resource), resourceExport(CORE.resource), resourceExport(CORE.resource), createLocale();
-// resource/common/resource.ts
-const ResourceName = GetCurrentResourceName();
-IsDuplicityVersion();
-// resource/server/log.ts
-const log = createLogger(ResourceName), MODELS = {
+IsDuplicityVersion(), resourceExport(CORE.resource), resourceExport(CORE.resource), resourceExport(CORE.resource), resourceExport(CORE.resource), resourceExport(CORE.resource), resourceExport(CORE.resource), resourceExport(CORE.resource), resourceExport(CORE.resource), resourceExport(CORE.resource);
+// resource/common/appearance.ts
+const MODELS = {
 	male: "mp_m_freemode_01",
 	female: "mp_f_freemode_01"
 }, PROP_IDS = [
@@ -15339,10 +15395,10 @@ function defaultAppearance(sex) {
 		props: Array.from({ length: 8 }, none)
 	};
 }
-const int$1 = (value, min, max) => typeof value == "number" && Number.isInteger(value) && value >= min && value <= max ? value : null, COLLECTION = /^[A-Za-z0-9_ ]{0,64}$/;
+const COLLECTION = /^[A-Za-z0-9_ ]{0,64}$/;
 function toDrawable(value, minIndex) {
 	if (!isRecord(value) || typeof value.collection != "string" || !COLLECTION.test(value.collection)) return null;
-	let index = int$1(value.index, minIndex, 4095), texture = int$1(value.texture, 0, 255);
+	let index = readInt(value.index, minIndex, 4095), texture = readInt(value.texture, 0, 255);
 	return index === null || texture === null ? null : {
 		collection: value.collection,
 		index,
@@ -15362,23 +15418,23 @@ function toList(value, length, read) {
 function toOverlay(value) {
 	if (!isRecord(value)) return null;
 	let overlay = {
-		value: int$1(value.value, -1, 255),
-		opacity: int$1(value.opacity, 0, 10),
-		color1: int$1(value.color1, 0, 63),
-		color2: int$1(value.color2, 0, 63)
+		value: readInt(value.value, -1, 255),
+		opacity: readInt(value.opacity, 0, 10),
+		color1: readInt(value.color1, 0, 63),
+		color2: readInt(value.color2, 0, 63)
 	};
 	return overlay.value === null || overlay.opacity === null || overlay.color1 === null || overlay.color2 === null ? null : overlay;
 }
 function toAppearance(value) {
 	if (!isRecord(value) || value.version !== 1 || value.model !== MODELS.male && value.model !== MODELS.female) return null;
 	let hb = isRecord(value.headBlend) ? value.headBlend : null, headBlend = hb && {
-		mother: int$1(hb.mother, 0, 255),
-		father: int$1(hb.father, 0, 255),
-		shapeMix: int$1(hb.shapeMix, 0, 100),
-		skinMix: int$1(hb.skinMix, 0, 100)
+		mother: readInt(hb.mother, 0, 255),
+		father: readInt(hb.father, 0, 255),
+		shapeMix: readInt(hb.shapeMix, 0, 100),
+		skinMix: readInt(hb.skinMix, 0, 100)
 	};
 	if (!headBlend || Object.values(headBlend).some((v) => v === null)) return null;
-	let faceFeatures = toList(value.faceFeatures, 20, (v) => int$1(v, -10, 10)), overlays = toList(value.overlays, 13, toOverlay), components = toList(value.components, 12, (v) => toDrawable(v, 0)), props = toList(value.props, 8, (v) => toDrawable(v, -1)), hairColor = int$1(value.hairColor, 0, 63), hairHighlight = int$1(value.hairHighlight, 0, 63), eyeColor = int$1(value.eyeColor, 0, 31);
+	let faceFeatures = toList(value.faceFeatures, 20, (v) => readInt(v, -10, 10)), overlays = toList(value.overlays, 13, toOverlay), components = toList(value.components, 12, (v) => toDrawable(v, 0)), props = toList(value.props, 8, (v) => toDrawable(v, -1)), hairColor = readInt(value.hairColor, 0, 63), hairHighlight = readInt(value.hairHighlight, 0, 63), eyeColor = readInt(value.eyeColor, 0, 31);
 	return !faceFeatures || !overlays || !components || !props || hairColor === null || hairHighlight === null || eyeColor === null ? null : {
 		version: 1,
 		model: value.model,
@@ -15395,8 +15451,8 @@ function toAppearance(value) {
 const sameDrawable = (a, b) => a?.collection === b?.collection && a?.index === b?.index && a?.texture === b?.texture, sameOverlay = (a, b) => a?.value === b?.value && a?.opacity === b?.opacity && a?.color1 === b?.color1 && a?.color2 === b?.color2, blip$1 = (value, sprite) => {
 	let v = record(value);
 	return {
-		sprite: int$2(v.sprite, sprite, 0, 1e3),
-		color: int$2(v.color, 47, 0, 100),
+		sprite: int$1(v.sprite, sprite, 0, 1e3),
+		color: int$1(v.color, 47, 0, 100),
 		scale: num(v.scale, .7, .1, 2)
 	};
 };
@@ -15410,8 +15466,8 @@ function readSettings(raw) {
 			heading: 270
 		}),
 		prices: {
-			clothing: int$2(prices.clothing, 50, 0),
-			barber: int$2(prices.barber, 100, 0)
+			clothing: int$1(prices.clothing, 50, 0),
+			barber: int$1(prices.barber, 100, 0)
 		},
 		accounts: accounts.length ? accounts : ["cash", "bank"],
 		blips: {
@@ -15500,8 +15556,12 @@ function shopChange(type, current, next) {
 		changes: +!!changed
 	};
 }
-// resource/server/schema.ts
-const int = (min, max) => ({
+createLocale();
+// resource/common/resource.ts
+const ResourceName = GetCurrentResourceName();
+IsDuplicityVersion();
+// resource/server/log.ts
+const log = createLogger(ResourceName), int = (min, max) => ({
 	type: "number",
 	min,
 	max,
@@ -15517,31 +15577,7 @@ const int = (min, max) => ({
 			max: 2
 		}
 	}
-}, blipFields = (kind) => [
-	{
-		widget: "number",
-		path: `blips.${kind}.sprite`,
-		label: "ADMIN_F_BLIP_SPRITE",
-		hint: "ADMIN_H_BLIP_SPRITE",
-		min: 0,
-		max: 1e3
-	},
-	{
-		widget: "number",
-		path: `blips.${kind}.color`,
-		label: "ADMIN_F_BLIP_COLOR",
-		min: 0,
-		max: 100
-	},
-	{
-		widget: "number",
-		path: `blips.${kind}.scale`,
-		label: "ADMIN_F_BLIP_SCALE",
-		min: .1,
-		max: 2,
-		step: .1
-	}
-], content = new AppearanceContent(new AdminPanel({
+}, content = new AppearanceContent(new AdminPanel({
 	title: "ADMIN_APPEARANCE_TITLE",
 	icon: "shirt",
 	files: {
@@ -15712,17 +15748,24 @@ const int = (min, max) => ({
 			{
 				icon: "shirt",
 				title: "ADMIN_C_BLIP_CLOTHING",
-				fields: blipFields("clothing")
+				fields: [{
+					widget: "blip",
+					path: "blips.clothing",
+					label: "ADMIN_F_BLIP_STYLE"
+				}]
 			},
 			{
 				icon: "scissors",
 				title: "ADMIN_C_BLIP_BARBER",
-				fields: blipFields("barber")
+				fields: [{
+					widget: "blip",
+					path: "blips.barber",
+					label: "ADMIN_F_BLIP_STYLE"
+				}]
 			}
 		]
 	}]
-}));
-// resource/server/repo.ts
+})), tablesReady = createDatabaseTables(ResourceName, "sql/main.sql").catch((error) => log.error("database setup failed", error));
 function parse(row) {
 	try {
 		let appearance = toAppearance(JSON.parse(row.data));
@@ -15758,26 +15801,13 @@ var Wearer = class {
 		this.charId = charId, this.sex = sex, this.appearance = appearance, this.creating = creating;
 	}
 };
-const wearers = new class {
-	bySource = new Map();
-	get(source) {
-		return this.bySource.get(source);
-	}
-	set(source, wearer) {
-		this.bySource.set(source, wearer);
-	}
-	delete(source) {
-		this.bySource.delete(source);
-	}
-}(), core = resourceExport("ai-core"), BUSY = {
-	ok: !1,
-	error: "APPEARANCE_ERR_BUSY"
-};
+const wearers = new PlayerMap(), core = resourceExport("ai-core"), BUSY = fail("APPEARANCE_ERR_BUSY");
 function enterCreatorBucket(source) {
 	let bucket = 6e4 + source;
 	SetRoutingBucketPopulationEnabled(bucket, !1), SetRoutingBucketEntityLockdownMode(bucket, "strict"), SetPlayerRoutingBucket(String(source), bucket);
 }
 async function dress(source, character) {
+	await tablesReady;
 	let stored = (await loadAppearances([character.id])).get(character.id);
 	if (core.GetCharacter(source)?.id !== character.id) return;
 	if (stored) {
@@ -15787,9 +15817,10 @@ async function dress(source, character) {
 	let start = defaultAppearance(character.sex);
 	wearers.set(source, new Wearer(character.id, character.sex, start, !0)), enterCreatorBucket(source), emitNet(EVENTS.create, source, start);
 }
-on(CORE.playerLoadedEvent, (source, character) => {
-	dress(source, character).catch((error) => log.error(`loading the look of character ${character.id} failed`, error));
-}), on(CORE.playerUnloadedEvent, (source) => wearers.delete(source)), on(CORE.characterScreenEvent, (source, charIds) => {
+onCharacter({
+	loaded: (source, character) => dress(source, character).catch((error) => log.error(`loading the look of character ${character.id} failed`, error)),
+	unloaded: (source) => wearers.delete(source)
+}), on(CORE.characterScreenEvent, (source, charIds) => {
 	loadAppearances(charIds).then((looks) => {
 		let list = [...looks].map(([id, appearance]) => ({
 			id,
@@ -15802,32 +15833,24 @@ on(CORE.playerLoadedEvent, (source, character) => {
 	lock: !0
 }, async (source, appearance) => {
 	let wearer = wearers.get(source);
-	return wearer?.creating ? appearance.model === MODELS[wearer.sex] ? (await saveAppearance(wearer.charId, appearance), wearer.appearance = appearance, wearer.creating = !1, SetPlayerRoutingBucket(String(source), 0), { ok: !0 }) : {
-		ok: !1,
-		error: "APPEARANCE_ERR_INVALID"
-	} : BUSY;
+	return wearer?.creating ? appearance.model === MODELS[wearer.sex] ? (await saveAppearance(wearer.charId, appearance), wearer.appearance = appearance, wearer.creating = !1, SetPlayerRoutingBucket(String(source), 0), { ok: !0 }) : fail("APPEARANCE_ERR_INVALID") : BUSY;
 });
 function pay(source, price, reason) {
 	return price <= 0 || content.settings.accounts.some((account) => core.RemoveMoney(source, account, price, reason));
 }
+// resource/server/index.ts
 onClientCallback(EVENTS.saveShop, {
-	args: ([shopId, raw]) => {
-		let appearance = toAppearance(raw);
-		return typeof shopId == "string" && appearance ? [shopId, appearance] : null;
+	args: ([rawShop, raw]) => {
+		let shopId = readText(rawShop, 64), appearance = toAppearance(raw);
+		return shopId !== null && appearance ? [shopId, appearance] : null;
 	},
 	lock: !0
 }, async (source, shopId, next) => {
 	let wearer = wearers.get(source), shop = content.shops.get(shopId);
 	if (!wearer || wearer.creating || !shop) return BUSY;
 	let [x = 0, y = 0, z = 0] = GetEntityCoords(GetPlayerPed(String(source)));
-	if (!insideShop(shop, x, y, z)) return {
-		ok: !1,
-		error: "APPEARANCE_ERR_FAR"
-	};
-	if (next.model !== wearer.appearance.model) return {
-		ok: !1,
-		error: "APPEARANCE_ERR_INVALID"
-	};
+	if (!insideShop(shop, x, y, z)) return fail("APPEARANCE_ERR_FAR");
+	if (next.model !== wearer.appearance.model) return fail("APPEARANCE_ERR_INVALID");
 	let { appearance, changes } = shopChange(shop.type, wearer.appearance, next);
 	if (changes === 0) return { ok: !0 };
 	let price = shop.type === "clothing" ? changes * content.settings.prices.clothing : content.settings.prices.barber;
@@ -15839,22 +15862,5 @@ onClientCallback(EVENTS.saveShop, {
 			changes,
 			price
 		}
-	}), { ok: !0 }) : {
-		ok: !1,
-		error: "APPEARANCE_ERR_MONEY"
-	};
-}), on("playerDropped", () => wearers.delete(Number(globalThis.source)));
-async function restoreOnline() {
-	let loaded = core.GetLoadedSources().flatMap((source) => {
-		let character = core.GetCharacter(source);
-		return character ? [{
-			source,
-			character
-		}] : [];
-	}), looks = await loadAppearances(loaded.map((entry) => entry.character.id));
-	for (let { source, character } of loaded) {
-		let look = looks.get(character.id);
-		look && wearers.set(source, new Wearer(character.id, character.sex, look, !1));
-	}
-}
-aiLogChannels({ purchases: {} }), createDatabaseTables(ResourceName, "sql/main.sql").then(restoreOnline).catch((error) => log.error("database setup failed", error));
+	}), { ok: !0 }) : fail("APPEARANCE_ERR_MONEY");
+}), aiLogChannels({ purchases: {} });

@@ -1,6 +1,14 @@
+import { createDatabaseTables } from "@aicore-fivem/lib/server";
 import { mysql } from "@aicore-fivem/mysql";
+import { ResourceName } from "common";
 import { toAppearance, type Appearance } from "common/appearance";
 import { log } from "./log";
+
+/** Our table exists (installed at start); reads wait for it. */
+export const tablesReady: Promise<void> = createDatabaseTables(
+  ResourceName,
+  "sql/main.sql",
+).catch((error: unknown) => log.error("database setup failed", error));
 
 interface Row {
   char_id: number;

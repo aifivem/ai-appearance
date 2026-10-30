@@ -1,4 +1,4 @@
-import { onServerEvent } from "@aicore-fivem/lib/client";
+import { onServerEvent, registerExport } from "@aicore-fivem/lib/client";
 import { asArgs, waitFor } from "@aicore-fivem/lib/shared";
 import { CORE } from "@aicore-fivem/shared";
 import { toAppearance, type Appearance } from "common/appearance";
@@ -33,3 +33,25 @@ onServerEvent(
 on(CORE.clientPlayerUnloadedEvent, () => {
   look.current = null;
 });
+
+/**
+ * `ApplyAppearance(ped, appearance)`: an `Appearance` on any ped of its model (ai-core's appearance layer: sleeping
+ * bodies, the character screen); false when the look is invalid, the ped is gone or its model differs.
+ */
+registerExport("ApplyAppearance", (ped: unknown, raw: unknown): boolean => {
+  const appearance = toAppearance(raw);
+  if (
+    !appearance ||
+    typeof ped !== "number" ||
+    !DoesEntityExist(ped) ||
+    GetEntityModel(ped) !== GetHashKey(appearance.model)
+  )
+    return false;
+  applyAppearance(ped, appearance);
+  return true;
+});
+
+/** `GetPedAppearance(ped)`: the look the local player wears; null for other peds (only the player's is known). */
+registerExport("GetPedAppearance", (ped: unknown): Appearance | null =>
+  ped === PlayerPedId() ? look.current : null,
+);

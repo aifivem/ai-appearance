@@ -67,22 +67,20 @@
       "type": "object",
       "properties": {
         "clothing": {
+          "description": "Blip look",
           "type": "object",
           "properties": {
             "sprite": {
-              "description": "Icon number: GTA blip id, see docs.fivem.net blips list.",
               "type": "integer",
               "minimum": 0,
               "maximum": 1000
             },
             "color": {
-              "description": "Colour number",
               "type": "integer",
               "minimum": 0,
               "maximum": 100
             },
             "scale": {
-              "description": "Size",
               "type": "number",
               "minimum": 0.1,
               "maximum": 2
@@ -95,22 +93,20 @@
           ]
         },
         "barber": {
+          "description": "Blip look",
           "type": "object",
           "properties": {
             "sprite": {
-              "description": "Icon number: GTA blip id, see docs.fivem.net blips list.",
               "type": "integer",
               "minimum": 0,
               "maximum": 1000
             },
             "color": {
-              "description": "Colour number",
               "type": "integer",
               "minimum": 0,
               "maximum": 100
             },
             "scale": {
-              "description": "Size",
               "type": "number",
               "minimum": 0.1,
               "maximum": 2

@@ -1,4 +1,4 @@
-import { isRecord } from "@aicore-fivem/lib/shared";
+import { isRecord, readInt } from "@aicore-fivem/lib/shared";
 import type { Sex } from "@aicore-fivem/shared";
 
 /** A character's look, stored as JSON per character and applied on the client. Indexes are the game's own ids. */
@@ -136,14 +136,6 @@ export function defaultAppearance(sex: Sex): Appearance {
   };
 }
 
-const int = (value: unknown, min: number, max: number): number | null =>
-  typeof value === "number" &&
-  Number.isInteger(value) &&
-  value >= min &&
-  value <= max
-    ? value
-    : null;
-
 const COLLECTION = /^[A-Za-z0-9_ ]{0,64}$/;
 
 function toDrawable(value: unknown, minIndex: number): Drawable | null {
@@ -153,8 +145,8 @@ function toDrawable(value: unknown, minIndex: number): Drawable | null {
     !COLLECTION.test(value.collection)
   )
     return null;
-  const index = int(value.index, minIndex, 4095);
-  const texture = int(value.texture, 0, 255);
+  const index = readInt(value.index, minIndex, 4095);
+  const texture = readInt(value.texture, 0, 255);
   return index === null || texture === null
     ? null
     : { collection: value.collection, index, texture };
@@ -178,10 +170,10 @@ function toList<T>(
 function toOverlay(value: unknown): Overlay | null {
   if (!isRecord(value)) return null;
   const overlay = {
-    value: int(value.value, -1, 255),
-    opacity: int(value.opacity, 0, 10),
-    color1: int(value.color1, 0, 63),
-    color2: int(value.color2, 0, 63),
+    value: readInt(value.value, -1, 255),
+    opacity: readInt(value.opacity, 0, 10),
+    color1: readInt(value.color1, 0, 63),
+    color2: readInt(value.color2, 0, 63),
   };
   return overlay.value === null ||
     overlay.opacity === null ||
@@ -197,24 +189,24 @@ export function toAppearance(value: unknown): Appearance | null {
   if (value.model !== MODELS.male && value.model !== MODELS.female) return null;
   const hb = isRecord(value.headBlend) ? value.headBlend : null;
   const headBlend = hb && {
-    mother: int(hb.mother, 0, 255),
-    father: int(hb.father, 0, 255),
-    shapeMix: int(hb.shapeMix, 0, 100),
-    skinMix: int(hb.skinMix, 0, 100),
+    mother: readInt(hb.mother, 0, 255),
+    father: readInt(hb.father, 0, 255),
+    shapeMix: readInt(hb.shapeMix, 0, 100),
+    skinMix: readInt(hb.skinMix, 0, 100),
   };
   if (!headBlend || Object.values(headBlend).some((v) => v === null))
     return null;
   const faceFeatures = toList(value.faceFeatures, FACE_FEATURES, (v) =>
-    int(v, -10, 10),
+    readInt(v, -10, 10),
   );
   const overlays = toList(value.overlays, OVERLAYS, toOverlay);
   const components = toList(value.components, COMPONENTS, (v) =>
     toDrawable(v, 0),
   );
   const props = toList(value.props, PROPS, (v) => toDrawable(v, -1));
-  const hairColor = int(value.hairColor, 0, 63);
-  const hairHighlight = int(value.hairHighlight, 0, 63);
-  const eyeColor = int(value.eyeColor, 0, 31);
+  const hairColor = readInt(value.hairColor, 0, 63);
+  const hairHighlight = readInt(value.hairHighlight, 0, 63);
+  const eyeColor = readInt(value.eyeColor, 0, 31);
   if (
     !faceFeatures ||
     !overlays ||
