@@ -1,4 +1,4 @@
-import { loadLocaleTexts, triggerServerCallback } from "@aicore-fivem/lib/client";
+import { cache, loadLocaleTexts, player, triggerServerCallback } from "@aicore-fivem/lib/client";
 import { isRecord } from "@aicore-fivem/lib/shared";
 import { CLOTHING_COMPONENTS, HAIR_COMPONENT, OVERLAYS, PROP_IDS, toAppearance, type Appearance } from "common/appearance";
 import { EVENTS, type SaveResult } from "common/events";
@@ -30,14 +30,21 @@ interface Session {
 class Editor {
   private session: Session | null = null;
   private readonly camera = new EditorCamera();
+  private readonly listeners: Array<() => void> = [];
 
   get isOpen(): boolean {
     return this.session !== null;
   }
 
+  /** Runs after the editor opened or closed. */
+  onOpenChange(listener: () => void): void {
+    this.listeners.push(listener);
+  }
+
   /** Opens the editor; resolves true after a save, false after a cancel. */
   async open(mode: EditorMode, appearance: Appearance, shopId: string | null = null): Promise<boolean> {
     if (this.session) return false;
+    // May run right after a model swap, before the cache has the new ped.
     const ped = PlayerPedId();
     const items = await catalog.items(ped);
     const pick = (lists: Record<number, Item[]>, ids: readonly number[]): Record<number, Item[]> =>
@@ -64,6 +71,7 @@ class Editor {
       this.camera.start(ped, mode === "clothing" ? "body" : "face");
       SetNuiFocus(true, true);
       SendNUIMessage({ action: NuiMessage.open, data });
+      for (const listener of this.listeners) listener();
     });
   }
 
@@ -71,7 +79,7 @@ class Editor {
     const s = this.session;
     const next = toAppearance(raw);
     if (!s || !next || next.model !== s.original.model) return;
-    applyChanges(PlayerPedId(), s.worn, next);
+    applyChanges(cache.ped, s.worn, next);
     s.worn = next;
   }
 
@@ -95,7 +103,7 @@ class Editor {
     const answer = await triggerServerCallback(s.mode === "creator" ? EVENTS.saveCreator : EVENTS.saveShop, args).catch(() => null);
     if (!isRecord(answer) || answer.ok !== true) return { ok: false, error: isRecord(answer) && typeof answer.error === "string" ? answer.error : BUSY.error };
     const stored = s.mode === "creator" ? s.worn : shopChange(s.mode, s.original, s.worn).appearance;
-    applyChanges(PlayerPedId(), s.worn, stored);
+    applyChanges(cache.ped, s.worn, stored);
     look.current = stored;
     this.close(true);
     return { ok: true };
@@ -104,7 +112,7 @@ class Editor {
   cancel(): void {
     const s = this.session;
     if (!s || s.mode === "creator") return;
-    applyChanges(PlayerPedId(), s.worn, s.original);
+    applyChanges(cache.ped, s.worn, s.original);
     this.close(false);
   }
 
@@ -115,10 +123,11 @@ class Editor {
     SetNuiFocus(false, false);
     SendNUIMessage({ action: NuiMessage.close });
     this.camera.stop();
-    FreezeEntityPosition(PlayerPedId(), false);
+    player.freeze(false);
     DisplayRadar(true);
     if (s.mode === "creator") SetStreamedTextureDictAsNoLongerNeeded(PORTRAIT_DICT);
     s.done(saved);
+    for (const listener of this.listeners) listener();
   }
 }
 

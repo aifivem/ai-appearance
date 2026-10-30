@@ -1,4 +1,4 @@
-import { onServerEvent, registerExport, requestModel } from "@aicore-fivem/lib/client";
+import { cache, onServerEvent, registerExport, requestModel } from "@aicore-fivem/lib/client";
 import { asArgs, createLogger, isRecord, sleep, waitFor } from "@aicore-fivem/lib/shared";
 import { CORE } from "@aicore-fivem/shared";
 import { toAppearance, type Appearance } from "common/appearance";
@@ -34,7 +34,7 @@ class Portraits {
 
     const hash = await requestModel(appearance.model);
     // In front of the player, who waits hidden below ai-core's character scene (out of its camera's view).
-    const [x = 0, y = 0, z = 0] = GetOffsetFromEntityInWorldCoords(PlayerPedId(), 0, 1.5, 0);
+    const [x = 0, y = 0, z = 0] = GetOffsetFromEntityInWorldCoords(cache.ped, 0, 1.5, 0);
     const ped = CreatePed(4, hash, x, y, z - 1, 0, false, false);
     SetModelAsNoLongerNeeded(hash);
     try {
