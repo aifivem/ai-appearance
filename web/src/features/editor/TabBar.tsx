@@ -4,7 +4,6 @@ import type { IconDefinition } from "@fortawesome/fontawesome-svg-core";
 import { faDna, faFaceSmile, faGem, faHandSparkles, faPalette, faScissors, faShirt } from "@fortawesome/free-solid-svg-icons";
 import type { EditorMode } from "../../../../resource/common/nui";
 import { Tabs, TabsList, TabsTrigger } from "../../components/ui/tabs";
-import { Tooltip, TooltipContent, TooltipTrigger } from "../../components/ui/tooltip";
 import { useLang } from "../../lib/lang";
 import { goToTab } from "./actions";
 import { isTab, TABS, type Tab } from "./tabs";
@@ -19,7 +18,7 @@ export const TAB_INFO: Record<Tab, { icon: IconDefinition; label: string }> = {
   accessories: { icon: faGem, label: "UI_TAB_ACCESSORIES" },
 };
 
-/** The mode's tabs as the round category column; the open one comes from the router, hover shows its name. */
+/** The mode's tabs as the category column: label pills with a round icon; the open one comes from the router. */
 export function TabBar({ mode, className }: { mode: EditorMode; className?: string }) {
   const t = useLang();
   const { tab } = useParams({ strict: false });
@@ -30,14 +29,12 @@ export function TabBar({ mode, className }: { mode: EditorMode; className?: stri
     <Tabs className={className} orientation="vertical" value={isTab(tab) ? tab : undefined} onValueChange={(value) => isTab(value) && goToTab(value)}>
       <TabsList active={active}>
         {tabs.map((id) => (
-          <Tooltip key={id}>
-            <TooltipTrigger asChild>
-              <TabsTrigger value={id} aria-label={t(TAB_INFO[id].label)}>
-                <FontAwesomeIcon icon={TAB_INFO[id].icon} aria-hidden />
-              </TabsTrigger>
-            </TooltipTrigger>
-            <TooltipContent side="left">{t(TAB_INFO[id].label)}</TooltipContent>
-          </Tooltip>
+          <TabsTrigger key={id} value={id}>
+            <span className="truncate">{t(TAB_INFO[id].label)}</span>
+            <span className="flex size-[3.6vh] shrink-0 items-center justify-center rounded-full bg-white/6 text-[1.6vh] transition-colors duration-150 group-data-[state=active]:bg-tgi-green-15 group-data-[state=active]:text-tgi-green">
+              <FontAwesomeIcon icon={TAB_INFO[id].icon} aria-hidden />
+            </span>
+          </TabsTrigger>
         ))}
       </TabsList>
     </Tabs>

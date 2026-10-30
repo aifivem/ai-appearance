@@ -4,7 +4,6 @@ import { motion } from "motion/react";
 import type { EditorMode } from "../../../../resource/common/nui";
 import { shopChange } from "../../../../resource/common/pricing";
 import { Button } from "../../components/ui/button";
-import { Tooltip, TooltipContent, TooltipTrigger } from "../../components/ui/tooltip";
 import { useLang } from "../../lib/lang";
 import { useAppSelector } from "../../store";
 import { cancel, save } from "./actions";
@@ -47,14 +46,10 @@ export function Footer({ mode }: { mode: EditorMode }) {
       )}
       <div className="flex gap-[0.8vh]">
         {mode !== "creator" && (
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button variant="secondary" className="w-[4.6vh] px-0" aria-label={t("UI_CANCEL")} disabled={busy} onClick={cancel}>
-                <FontAwesomeIcon icon={faDoorOpen} className="text-[1.7vh]" aria-hidden />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent side="top">{t("UI_CANCEL")}</TooltipContent>
-          </Tooltip>
+          <Button variant="secondary" className="px-[1.6vh]" disabled={busy} onClick={cancel}>
+            <FontAwesomeIcon icon={faDoorOpen} className="text-[1.5vh]" data-icon="inline-start" aria-hidden />
+            {t("UI_CANCEL")}
+          </Button>
         )}
         <Button variant="primary" className="min-w-0 flex-1" busy={busy} onClick={() => void save()}>
           {label}

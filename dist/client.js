@@ -107,11 +107,11 @@ try{
 	}
 
 // ../../../packages/lib/src/client/callback.ts
-	const resource = GetCurrentResourceName();
-	const log$3 = createLogger(resource);
+	const resource$1 = GetCurrentResourceName();
+	const log$3 = createLogger(resource$1);
 	const pending = /* @__PURE__ */ new Map();
 	let nextId = 0;
-	onNet(responseEvent(resource), (id, ok, result) => {
+	onNet(responseEvent(resource$1), (id, ok, result) => {
 		if (!fromServer()) return;
 		const entry = typeof id === "number" ? pending.get(id) : void 0;
 		if (!entry) return;
@@ -136,7 +136,7 @@ try{
 				reject,
 				timer
 			});
-			emitNet(requestEvent(name), resource, id, ...args);
+			emitNet(requestEvent(name), resource$1, id, ...args);
 		});
 	}
 
@@ -162,10 +162,16 @@ try{
 		activeGangChangedEvent: "ai-core:activeGangChanged",
 		/** (src, charIds: number[]) each time a player's character screen loads; an appearance resource answers with portraits. */
 		characterScreenEvent: "ai-core:characterScreen",
+		/** (resource: string | null) the inventory behind ai-core's inventory layer changed (the bridge drops its item cache). */
+		inventoryChangedEvent: "ai-core:inventoryChanged",
+		/** (src, name: string, status: Record<string, number> | null) a player used an item; status = the needs it gives, from inventories that define them. */
+		itemUsedEvent: "ai-core:itemUsed",
 		clientPlayerLoadedEvent: "ai-core:client:playerLoaded",
 		clientPlayerUnloadedEvent: "ai-core:client:playerUnloaded",
 		/** (charId: number, url: string) a portrait image of a character on the character screen (e.g. `https://nui-img/<txd>/<txd>`). */
 		clientCharacterPortraitEvent: "ai-core:client:characterPortrait",
+		/** (charId: number) ai-appearance holds this character's look: ai-core dresses its scene ped with `ApplyCharacterAppearance`. */
+		clientCharacterLookEvent: "ai-core:client:characterLook",
 		/** (resource: string, id: string) the interaction key was pressed while that resource's prompt was on top. */
 		clientPromptPressedEvent: "ai-core:client:promptPressed",
 		/** (key: keyof PlayerCache, value) a cached value of the local player changed (one watcher in ai-core for every resource). */
@@ -187,9 +193,12 @@ try{
 	const ADMIN = {
 		/** ACE every panel action checks: `add_ace group.admin ai.admin allow`. */
 		ace: "ai.admin",
+		/** Callback: (keybinds: KeybindInfo[] the admin's client knows) -> AdminPanelSnapshot[]. */
 		openCallback: "ai-core:admin:open",
 		applyCallback: "ai-core:admin:apply",
 		closeEvent: "ai-core:admin:close",
+		/** Server -> client: () open the panel (the `aiadmin` command, checked on the server). */
+		showEvent: "ai-core:admin:show",
 		/** Server -> admins with the panel open: (delta: AdminDelta). */
 		deltaEvent: "ai-core:admin:delta",
 		/** Server -> client of a world (`sync: "all"`) file: (file, key | null, value). Prefixed with the resource name. */
@@ -217,6 +226,8 @@ try{
 		data = /* @__PURE__ */ new Map();
 		handlers = /* @__PURE__ */ new Map();
 		resource = GetCurrentResourceName();
+		/** Resolves once the changes since start are applied (or could not be loaded): the data is current from then on. */
+		ready;
 		/** `files`: the world files this client mirrors (each must be in the resource's `files`). */
 		constructor(files) {
 			const log = createLogger(this.resource);
@@ -235,7 +246,7 @@ try{
 				typeof key === "string" && key !== "" ? key : void 0,
 				value
 			] : null }, (file, key, value) => this.put(file, key, value));
-			triggerServerCallback(ADMIN.worldChangesCallback(this.resource)).then((changes) => {
+			this.ready = triggerServerCallback(ADMIN.worldChangesCallback(this.resource)).then((changes) => {
 				if (!isRecord(changes)) return;
 				for (const [file, records] of Object.entries(changes)) {
 					if (!isRecord(records)) continue;
@@ -482,7 +493,10 @@ try{
 	};
 
 // ../../../packages/lib/src/fivem/exports.ts
-/** Typed access to another resource's exports (types come from CitizenExports in @aicore-fivem/shared). */
+	function registerExport(name, handler) {
+		globalThis.exports(name, handler);
+	}
+	/** Typed access to another resource's exports (types come from CitizenExports in @aicore-fivem/shared). */
 	function resourceExport(resource) {
 		return globalThis.exports[resource];
 	}
@@ -551,6 +565,9 @@ try{
 
 // ../../../packages/lib/src/client/vehicleProps.ts
 	const MOD_TYPES = Array.from({ length: 50 }, (_, i) => i);
+
+// ../../../packages/lib/src/client/keybind.ts
+	const resource = GetCurrentResourceName();
 
 // ../../../packages/lib/src/fivem/locale.ts
 /** Convar holding the language (`setr ai:locale "en"` in misc.cfg); replicated so clients read it too. */
@@ -1733,7 +1750,7 @@ try{
 // resource/client/portraits.ts
 	const log = createLogger(ResourceName);
 	/**
-	* Portraits for ai-core's character cards: each look goes on a local ped behind the full-screen menu, the
+	* Portraits for ai-core's character cards: each look goes on a local ped near the hidden player, the
 	* game renders a transparent headshot of it, ai-core shows it through `nui-img`. Headshots live until a character spawns.
 	*/
 	var Portraits = class {
@@ -1783,6 +1800,14 @@ try{
 		}
 	};
 	const portraits = new Portraits();
+	/** Looks of the character screen's cards by character id, for ai-core's scene peds; kept until a character spawns. */
+	const screenLooks = /* @__PURE__ */ new Map();
+	registerExport("ApplyCharacterAppearance", (ped, charId) => {
+		const look = typeof charId === "number" ? screenLooks.get(charId) : void 0;
+		if (!look || typeof ped !== "number" || !DoesEntityExist(ped) || GetEntityModel(ped) !== GetHashKey(look.model)) return false;
+		applyAppearance(ped, look);
+		return true;
+	});
 	/** Cards of the character screen: only entries with a numeric id and a valid look pass. */
 	function toPortraitList(raw) {
 		if (!Array.isArray(raw)) return null;
@@ -1795,8 +1820,17 @@ try{
 			}] : [];
 		});
 	}
-	onServerEvent(EVENTS.portraits, { args: ([raw]) => asArgs(toPortraitList(raw)) }, (list) => portraits.request(list));
-	on(CORE.clientPlayerLoadedEvent, () => portraits.clear());
+	onServerEvent(EVENTS.portraits, { args: ([raw]) => asArgs(toPortraitList(raw)) }, (list) => {
+		for (const { id, appearance } of list) {
+			screenLooks.set(id, appearance);
+			emit(CORE.clientCharacterLookEvent, id);
+		}
+		portraits.request(list);
+	});
+	on(CORE.clientPlayerLoadedEvent, () => {
+		portraits.clear();
+		screenLooks.clear();
+	});
 	on("onResourceStop", (resource) => {
 		if (resource === ResourceName) portraits.clear();
 	});

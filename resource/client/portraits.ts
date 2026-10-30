@@ -1,4 +1,4 @@
-import { onServerEvent, requestModel } from "@aicore-fivem/lib/client";
+import { onServerEvent, registerExport, requestModel } from "@aicore-fivem/lib/client";
 import { asArgs, createLogger, isRecord, sleep, waitFor } from "@aicore-fivem/lib/shared";
 import { CORE } from "@aicore-fivem/shared";
 import { toAppearance, type Appearance } from "common/appearance";
@@ -9,7 +9,7 @@ import { applyAppearance } from "./skin";
 const log = createLogger(ResourceName);
 
 /**
- * Portraits for ai-core's character cards: each look goes on a local ped behind the full-screen menu, the
+ * Portraits for ai-core's character cards: each look goes on a local ped near the hidden player, the
  * game renders a transparent headshot of it, ai-core shows it through `nui-img`. Headshots live until a character spawns.
  */
 class Portraits {
@@ -33,7 +33,7 @@ class Portraits {
     this.shots.delete(id);
 
     const hash = await requestModel(appearance.model);
-    // In front of the player, who waits behind ai-core's opaque character screen.
+    // In front of the player, who waits hidden below ai-core's character scene (out of its camera's view).
     const [x = 0, y = 0, z = 0] = GetOffsetFromEntityInWorldCoords(PlayerPedId(), 0, 1.5, 0);
     const ped = CreatePed(4, hash, x, y, z - 1, 0, false, false);
     SetModelAsNoLongerNeeded(hash);
@@ -65,6 +65,15 @@ class Portraits {
 }
 
 const portraits = new Portraits();
+/** Looks of the character screen's cards by character id, for ai-core's scene peds; kept until a character spawns. */
+const screenLooks = new Map<number, Appearance>();
+
+registerExport("ApplyCharacterAppearance", (ped: unknown, charId: unknown): boolean => {
+  const look = typeof charId === "number" ? screenLooks.get(charId) : undefined;
+  if (!look || typeof ped !== "number" || !DoesEntityExist(ped) || GetEntityModel(ped) !== GetHashKey(look.model)) return false;
+  applyAppearance(ped, look);
+  return true;
+});
 
 /** Cards of the character screen: only entries with a numeric id and a valid look pass. */
 function toPortraitList(raw: unknown): Array<{ id: number; appearance: Appearance }> | null {
@@ -76,9 +85,18 @@ function toPortraitList(raw: unknown): Array<{ id: number; appearance: Appearanc
   });
 }
 
-onServerEvent(EVENTS.portraits, { args: ([raw]) => asArgs(toPortraitList(raw)) }, (list) => portraits.request(list));
+onServerEvent(EVENTS.portraits, { args: ([raw]) => asArgs(toPortraitList(raw)) }, (list) => {
+  for (const { id, appearance } of list) {
+    screenLooks.set(id, appearance);
+    emit(CORE.clientCharacterLookEvent, id);
+  }
+  portraits.request(list);
+});
 
-on(CORE.clientPlayerLoadedEvent, () => portraits.clear());
+on(CORE.clientPlayerLoadedEvent, () => {
+  portraits.clear();
+  screenLooks.clear();
+});
 on("onResourceStop", (resource: string) => {
   if (resource === ResourceName) portraits.clear();
 });
