@@ -417,8 +417,28 @@ const ERR = {
 	range: "ADMIN_ERR_RANGE",
 	length: "ADMIN_ERR_LENGTH",
 	pattern: "ADMIN_ERR_PATTERN",
-	required: "ADMIN_ERR_REQUIRED"
+	required: "ADMIN_ERR_REQUIRED",
+	lookup: "ADMIN_ERR_LOOKUP"
 };
+/** Values of a lookup list from ai-core (items, jobs, gangs, accounts), cached for 2 s; null = not known (accepted). */
+var LookupCache = class {
+	lists = /* @__PURE__ */ new Map();
+	values(source) {
+		const cached = this.lists.get(source);
+		if (cached && Date.now() - cached.at < 2e3) return cached.values.size > 0 ? cached.values : null;
+		let list = [];
+		try {
+			list = resourceExport(CORE.resource).GetLookupValues(source);
+		} catch {}
+		const values = new Set(Array.isArray(list) ? list.filter((v) => typeof v === "string") : []);
+		this.lists.set(source, {
+			at: Date.now(),
+			values
+		});
+		return values.size > 0 ? values : null;
+	}
+};
+const lookups = new LookupCache();
 const isVec = (value, keys) => isRecord(value) && keys.every((k) => typeof value[k] === "number" && Number.isFinite(value[k]));
 /** Checks a value against its spec; the first problem found, or null. */
 function validate(spec, value, path) {
@@ -435,6 +455,7 @@ function validate(spec, value, path) {
 			if (typeof value !== "string") return fail(ERR.type);
 			if (value.length < (spec.min ?? 1) || value.length > (spec.max ?? 120)) return fail(ERR.length);
 			if (spec.pattern && !new RegExp(spec.pattern).test(value)) return fail(ERR.pattern);
+			if (spec.lookup && value !== "" && lookups.values(spec.lookup)?.has(value) === false) return fail(ERR.lookup);
 			return null;
 		case "number":
 			if (typeof value !== "number" || !Number.isFinite(value)) return fail(ERR.type);
@@ -450,6 +471,7 @@ function validate(spec, value, path) {
 			for (const name of value) {
 				if (typeof name !== "string" || name.length > (spec.itemMax ?? 64) || seen.has(name)) return fail(ERR.type);
 				if (!pattern.test(name)) return fail(ERR.pattern);
+				if (spec.lookup && lookups.values(spec.lookup)?.has(name) === false) return fail(ERR.lookup);
 				seen.add(name);
 			}
 			return null;
@@ -25801,6 +25823,7 @@ const appearanceSchema = {
 				},
 				accounts: {
 					type: "names",
+					lookup: "account",
 					max: 5,
 					itemMax: 32,
 					pattern: "^[a-z0-9_]{2,32}$"
@@ -25936,6 +25959,7 @@ const appearanceSchema = {
 					},
 					{
 						widget: "tags",
+						lookup: "account",
 						path: "accounts",
 						label: "ADMIN_F_PAY_ACCOUNTS",
 						hint: "ADMIN_H_PAY_ACCOUNTS",

@@ -20,7 +20,7 @@ export const appearanceSchema: PanelSchema = {
       sections: {
         creator: { type: "vec4" },
         prices: { type: "object", fields: { clothing: int(0, 1_000_000), barber: int(0, 1_000_000) } },
-        accounts: { type: "names", max: 5, itemMax: 32, pattern: "^[a-z0-9_]{2,32}$" },
+        accounts: { type: "names", lookup: "account", max: 5, itemMax: 32, pattern: "^[a-z0-9_]{2,32}$" },
         blips: { type: "object", fields: { clothing: blip, barber: blip } },
       },
     },
@@ -88,7 +88,7 @@ export const appearanceSchema: PanelSchema = {
           fields: [
             { widget: "number", path: "prices.clothing", label: "ADMIN_F_PRICE_CLOTHING", hint: "ADMIN_H_PRICE_CLOTHING", min: 0, step: 10, unit: "$" },
             { widget: "number", path: "prices.barber", label: "ADMIN_F_PRICE_BARBER", hint: "ADMIN_H_PRICE_BARBER", min: 0, step: 10, unit: "$" },
-            { widget: "tags", path: "accounts", label: "ADMIN_F_PAY_ACCOUNTS", hint: "ADMIN_H_PAY_ACCOUNTS", placeholder: "ADMIN_PH_ACCOUNT_KEY" },
+            { widget: "tags", lookup: "account", path: "accounts", label: "ADMIN_F_PAY_ACCOUNTS", hint: "ADMIN_H_PAY_ACCOUNTS", placeholder: "ADMIN_PH_ACCOUNT_KEY" },
           ],
         },
         { icon: "shirt", title: "ADMIN_C_BLIP_CLOTHING", fields: blipFields("clothing") },
