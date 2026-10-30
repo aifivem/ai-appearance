@@ -1,4 +1,5 @@
-import { TickLoop } from "@aicore-fivem/lib/client";
+import { raycast, TickLoop } from "@aicore-fivem/lib/client";
+import { distance } from "@aicore-fivem/lib/shared";
 import type { CameraZone } from "common/nui";
 
 /**
@@ -134,30 +135,13 @@ export class EditorCamera {
     let z = lz + (oz - lz) * scale;
 
     // Map only (flag 1): shop racks would push the camera around.
-    const [, hit, end] = GetShapeTestResult(
-      StartExpensiveSynchronousShapeTestLosProbe(
-        rx,
-        ry,
-        lz,
-        x,
-        y,
-        z,
-        1,
-        this.ped,
-        7,
-      ),
-    );
-    if (hit && end) {
+    const look = { x: rx, y: ry, z: lz };
+    const hit = raycast(look, { x, y, z }, { flags: 1, ignore: this.ped });
+    if (hit) {
       const full = Math.hypot(x - rx, y - ry, z - lz);
       const reach = Math.max(
         0.2,
-        (Math.hypot(
-          (end[0] ?? 0) - rx,
-          (end[1] ?? 0) - ry,
-          (end[2] ?? 0) - lz,
-        ) -
-          WALL_GAP) /
-          full,
+        (distance(hit.coords, look) - WALL_GAP) / full,
       );
       x = rx + (x - rx) * reach;
       y = ry + (y - ry) * reach;

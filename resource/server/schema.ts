@@ -1,19 +1,13 @@
-import { PLACE_PED_SPEC, placePedFields } from "@aicore-fivem/lib/shared";
+import { PLACE_PED_SPEC, placePedFields, spec } from "@aicore-fivem/lib/shared";
 import type { DataSpec, PanelSchema } from "@aicore-fivem/shared";
 
 /** ai-appearance's panel: the creator room, prices, pay accounts, blips and the store locations. */
 
-const int = (min: number, max: number): DataSpec => ({
-  type: "number",
-  min,
-  max,
-  integer: true,
-});
 const blip: DataSpec = {
   type: "object",
   fields: {
-    sprite: int(0, 1000),
-    color: int(0, 100),
+    sprite: spec.int(0, 1000),
+    color: spec.int(0, 100),
     scale: { type: "number", min: 0.1, max: 2 },
   },
 };
@@ -28,7 +22,7 @@ export const appearanceSchema: PanelSchema = {
         creator: { type: "vec4" },
         prices: {
           type: "object",
-          fields: { clothing: int(0, 1_000_000), barber: int(0, 1_000_000) },
+          fields: { clothing: spec.int(0, 1_000_000), barber: spec.int(0, 1_000_000) },
         },
         accounts: {
           type: "names",
