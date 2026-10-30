@@ -1,22 +1,22 @@
-import { OVERLAY } from "../../../../../resource/common/appearance"
-import { Section, Stepper } from "../../../components/controls"
-import { useLang } from "../../../lib/lang"
-import { useAppDispatch, useAppSelector } from "../../../store"
-import { eyeColorSet } from "../../../store/editor"
-import { focusCamera } from "../actions"
-import { FACE_PLANES, FACE_SLIDERS } from "../face/faceLayout"
-import { FacePlane } from "../face/FacePlane"
-import { FaceSlider } from "../face/FaceSlider"
-import { OverlayControl } from "./Overlay"
+import { OVERLAY } from "../../../../../resource/common/appearance";
+import { Section, Stepper } from "../../../components/controls";
+import { useLang } from "../../../lib/lang";
+import { useAppDispatch, useAppSelector } from "../../../store";
+import { eyeColorSet } from "../../../store/editor";
+import { focusCamera } from "../actions";
+import { FACE_PLANES, FACE_SLIDERS } from "../face/faceLayout";
+import { FacePlane } from "../face/FacePlane";
+import { FaceSlider } from "../face/FaceSlider";
+import { OverlayControl } from "./Overlay";
 
-const EYE_COLORS = 32
+const EYE_COLORS = 32;
 
 export function FaceTab() {
-  const t = useLang()
-  const dispatch = useAppDispatch()
+  const t = useLang();
+  const dispatch = useAppDispatch();
   const eyeColor = useAppSelector(
-    (state) => state.editor.appearance?.eyeColor ?? 0
-  )
+    (state) => state.editor.appearance?.eyeColor ?? 0,
+  );
   return (
     <>
       <Section title={t("UI_FACE_FEATURES")}>
@@ -44,11 +44,11 @@ export function FaceTab() {
         />
       </Section>
     </>
-  )
+  );
 }
 
 export function SkinTab() {
-  const t = useLang()
+  const t = useLang();
   return (
     <Section title={t("UI_TAB_SKIN")}>
       {[
@@ -62,16 +62,16 @@ export function SkinTab() {
         <OverlayControl key={id} id={id} />
       ))}
     </Section>
-  )
+  );
 }
 
 export function MakeupTab() {
-  const t = useLang()
+  const t = useLang();
   return (
     <Section title={t("UI_TAB_MAKEUP")}>
       {[OVERLAY.makeup, OVERLAY.blush, OVERLAY.lipstick].map((id) => (
         <OverlayControl key={id} id={id} />
       ))}
     </Section>
-  )
+  );
 }

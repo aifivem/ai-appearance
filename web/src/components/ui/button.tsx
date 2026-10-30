@@ -1,8 +1,8 @@
-import type { ComponentProps } from "react"
-import { cva, type VariantProps } from "class-variance-authority"
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
-import { faSpinner } from "@fortawesome/free-solid-svg-icons"
-import { cn } from "../../lib/utils"
+import type { ComponentProps } from "react";
+import { cva, type VariantProps } from "class-variance-authority";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faSpinner } from "@fortawesome/free-solid-svg-icons";
+import { cn } from "../../lib/utils";
 
 /**
  * TGIANN buttons as in tgiann-clothing (docs/design.md): green `primary` with the display font for the view's one
@@ -28,13 +28,13 @@ const buttonVariants = cva(
       { variant: "icon", className: "h-[3.4vh] text-[1.3vh]" },
     ],
     defaultVariants: { variant: "secondary", size: "md" },
-  }
-)
+  },
+);
 
 interface ButtonProps
   extends ComponentProps<"button">, VariantProps<typeof buttonVariants> {
   /** Shows a spinner next to the label and disables the button while an action runs. */
-  busy?: boolean
+  busy?: boolean;
 }
 
 export function Button({
@@ -60,5 +60,5 @@ export function Button({
       )}
       {children}
     </button>
-  )
+  );
 }

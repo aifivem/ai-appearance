@@ -1,4 +1,4 @@
-import type { DataSpec, PanelSchema, WidgetSpec } from "@aicore-fivem/shared"
+import type { DataSpec, PanelSchema, WidgetSpec } from "@aicore-fivem/shared";
 
 /** ai-appearance's panel: the creator room, prices, pay accounts, blips and the store locations. */
 
@@ -7,7 +7,7 @@ const int = (min: number, max: number): DataSpec => ({
   min,
   max,
   integer: true,
-})
+});
 const blip: DataSpec = {
   type: "object",
   fields: {
@@ -15,7 +15,7 @@ const blip: DataSpec = {
     color: int(0, 100),
     scale: { type: "number", min: 0.1, max: 2 },
   },
-}
+};
 const blipFields = (kind: "clothing" | "barber"): WidgetSpec[] => [
   {
     widget: "number",
@@ -40,7 +40,7 @@ const blipFields = (kind: "clothing" | "barber"): WidgetSpec[] => [
     max: 2,
     step: 0.1,
   },
-]
+];
 
 export const appearanceSchema: PanelSchema = {
   title: "ADMIN_APPEARANCE_TITLE",
@@ -196,4 +196,4 @@ export const appearanceSchema: PanelSchema = {
       ],
     },
   ],
-}
+};

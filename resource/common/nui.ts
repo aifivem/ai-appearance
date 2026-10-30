@@ -1,38 +1,38 @@
 /** NUI contract of ai-appearance (client script <-> web), shared by both sides. */
-import type { Appearance } from "./appearance"
+import type { Appearance } from "./appearance";
 
-export type EditorMode = "creator" | "clothing" | "barber"
+export type EditorMode = "creator" | "clothing" | "barber";
 
 /** One wearable item of a component or prop: collection, local index, texture count. */
 export interface Item {
-  c: string
-  i: number
-  t: number
+  c: string;
+  i: number;
+  t: number;
 }
 
 export interface Parent {
-  id: number
-  name: string
+  id: number;
+  name: string;
   /** Game texture shown as the portrait (`https://nui-img/<dict>/<name>`). */
-  image: string
+  image: string;
 }
 
 /** Everything the editor needs, sent once when it opens. */
 export interface EditorData {
-  mode: EditorMode
-  appearance: Appearance
+  mode: EditorMode;
+  appearance: Appearance;
   /** Wearable items by component id / prop id (only the ones the mode edits). */
-  components: Record<number, Item[]>
-  props: Record<number, Item[]>
+  components: Record<number, Item[]>;
+  props: Record<number, Item[]>;
   /** Highest value of each head overlay (13 entries, -1 when the model has none). */
-  overlayMax: number[]
-  hairColors: string[]
-  makeupColors: string[]
-  mothers: Parent[]
-  fathers: Parent[]
+  overlayMax: number[];
+  hairColors: string[];
+  makeupColors: string[];
+  mothers: Parent[];
+  fathers: Parent[];
   /** Price of one changed item (clothing) or of the visit (barber); 0 in the creator. */
-  price: number
-  texts: Record<string, string>
+  price: number;
+  texts: Record<string, string>;
 }
 
 /** Client -> NUI messages: `{ action, data }`. */
@@ -40,7 +40,7 @@ export const NuiMessage = {
   /** data: EditorData */
   open: "open",
   close: "close",
-} as const
+} as const;
 
 /** NUI -> client callbacks (fetch `https://ai-appearance/<name>`). */
 export const NuiCallback = {
@@ -56,6 +56,6 @@ export const NuiCallback = {
   save: "save",
   /** () -> true, puts the old look back and closes (not in the creator). */
   cancel: "cancel",
-} as const
+} as const;
 
-export type CameraZone = "face" | "head" | "upper" | "body" | "feet"
+export type CameraZone = "face" | "head" | "upper" | "body" | "feet";

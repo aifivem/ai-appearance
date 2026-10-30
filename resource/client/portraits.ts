@@ -3,21 +3,21 @@ import {
   onServerEvent,
   registerExport,
   requestModel,
-} from "@aicore-fivem/lib/client"
+} from "@aicore-fivem/lib/client";
 import {
   asArgs,
   createLogger,
   isRecord,
   sleep,
   waitFor,
-} from "@aicore-fivem/lib/shared"
-import { CORE } from "@aicore-fivem/shared"
-import { toAppearance, type Appearance } from "common/appearance"
-import { EVENTS } from "common/events"
-import { ResourceName } from "common"
-import { applyAppearance } from "./skin"
+} from "@aicore-fivem/lib/shared";
+import { CORE } from "@aicore-fivem/shared";
+import { toAppearance, type Appearance } from "common/appearance";
+import { EVENTS } from "common/events";
+import { ResourceName } from "common";
+import { applyAppearance } from "./skin";
 
-const log = createLogger(ResourceName)
+const log = createLogger(ResourceName);
 
 /**
  * Portraits for ai-core's character cards: each look goes on a local ped near the hidden player, the
@@ -25,106 +25,110 @@ const log = createLogger(ResourceName)
  */
 class Portraits {
   /** Character id -> headshot handle and the look it shows. */
-  private readonly shots = new Map<number, { handle: number; key: string }>()
-  private queue: Promise<void> = Promise.resolve()
+  private readonly shots = new Map<number, { handle: number; key: string }>();
+  private queue: Promise<void> = Promise.resolve();
 
   request(list: Array<{ id: number; appearance: Appearance }>): void {
     this.queue = this.queue.then(async () => {
       for (const { id, appearance } of list) {
         await this.make(id, appearance).catch((error: unknown) =>
-          log.error(`portrait of character ${id} failed`, error)
-        )
+          log.error(`portrait of character ${id} failed`, error),
+        );
       }
-    })
+    });
   }
 
   private async make(id: number, appearance: Appearance): Promise<void> {
-    const key = JSON.stringify(appearance)
-    const old = this.shots.get(id)
+    const key = JSON.stringify(appearance);
+    const old = this.shots.get(id);
     if (old?.key === key && IsPedheadshotValid(old.handle))
-      return this.announce(id, old.handle)
-    if (old) UnregisterPedheadshot(old.handle)
-    this.shots.delete(id)
+      return this.announce(id, old.handle);
+    if (old) UnregisterPedheadshot(old.handle);
+    this.shots.delete(id);
 
-    const hash = await requestModel(appearance.model)
+    const hash = await requestModel(appearance.model);
     // In front of the player, who waits hidden below ai-core's character scene (out of its camera's view).
     const [x = 0, y = 0, z = 0] = GetOffsetFromEntityInWorldCoords(
       cache.ped,
       0,
       1.5,
-      0
-    )
-    const ped = CreatePed(4, hash, x, y, z - 1, 0, false, false)
-    SetModelAsNoLongerNeeded(hash)
+      0,
+    );
+    const ped = CreatePed(4, hash, x, y, z - 1, 0, false, false);
+    SetModelAsNoLongerNeeded(hash);
     try {
-      FreezeEntityPosition(ped, true)
-      SetEntityInvincible(ped, true)
-      SetBlockingOfNonTemporaryEvents(ped, true)
-      applyAppearance(ped, appearance)
+      FreezeEntityPosition(ped, true);
+      SetEntityInvincible(ped, true);
+      SetBlockingOfNonTemporaryEvents(ped, true);
+      applyAppearance(ped, appearance);
       await waitFor(
         () =>
           (HasPedHeadBlendFinished(ped) &&
             HasPedPreloadVariationDataFinished(ped)) ||
           undefined,
-        3000
-      ).catch(() => undefined)
-      await sleep(100)
-      const handle = RegisterPedheadshotTransparent(ped)
+        3000,
+      ).catch(() => undefined);
+      await sleep(100);
+      const handle = RegisterPedheadshotTransparent(ped);
       await waitFor(
         () =>
           (IsPedheadshotReady(handle) && IsPedheadshotValid(handle)) ||
           undefined,
-        5000
-      )
-      this.shots.set(id, { handle, key })
-      this.announce(id, handle)
+        5000,
+      );
+      this.shots.set(id, { handle, key });
+      this.announce(id, handle);
     } finally {
-      DeletePed(ped)
+      DeletePed(ped);
     }
   }
 
   private announce(id: number, handle: number): void {
-    const txd = GetPedheadshotTxdString(handle)
-    emit(CORE.clientCharacterPortraitEvent, id, `https://nui-img/${txd}/${txd}`)
+    const txd = GetPedheadshotTxdString(handle);
+    emit(
+      CORE.clientCharacterPortraitEvent,
+      id,
+      `https://nui-img/${txd}/${txd}`,
+    );
   }
 
   clear(): void {
-    for (const { handle } of this.shots.values()) UnregisterPedheadshot(handle)
-    this.shots.clear()
+    for (const { handle } of this.shots.values()) UnregisterPedheadshot(handle);
+    this.shots.clear();
   }
 }
 
-const portraits = new Portraits()
+const portraits = new Portraits();
 /** Looks of the character screen's cards by character id, for ai-core's scene peds; kept until a character spawns. */
-const screenLooks = new Map<number, Appearance>()
+const screenLooks = new Map<number, Appearance>();
 
 registerExport(
   "ApplyCharacterAppearance",
   (ped: unknown, charId: unknown): boolean => {
     const look =
-      typeof charId === "number" ? screenLooks.get(charId) : undefined
+      typeof charId === "number" ? screenLooks.get(charId) : undefined;
     if (
       !look ||
       typeof ped !== "number" ||
       !DoesEntityExist(ped) ||
       GetEntityModel(ped) !== GetHashKey(look.model)
     )
-      return false
-    applyAppearance(ped, look)
-    return true
-  }
-)
+      return false;
+    applyAppearance(ped, look);
+    return true;
+  },
+);
 
 /** Cards of the character screen: only entries with a numeric id and a valid look pass. */
 function toPortraitList(
-  raw: unknown
+  raw: unknown,
 ): Array<{ id: number; appearance: Appearance }> | null {
-  if (!Array.isArray(raw)) return null
+  if (!Array.isArray(raw)) return null;
   return raw.flatMap((entry: unknown) => {
-    if (!isRecord(entry) || typeof entry.id !== "number") return []
-    const appearance = toAppearance(entry.appearance)
-    return appearance ? [{ id: entry.id, appearance }] : []
-  })
+    if (!isRecord(entry) || typeof entry.id !== "number") return [];
+    const appearance = toAppearance(entry.appearance);
+    return appearance ? [{ id: entry.id, appearance }] : [];
+  });
 }
 
 onServerEvent(
@@ -132,17 +136,17 @@ onServerEvent(
   { args: ([raw]) => asArgs(toPortraitList(raw)) },
   (list) => {
     for (const { id, appearance } of list) {
-      screenLooks.set(id, appearance)
-      emit(CORE.clientCharacterLookEvent, id)
+      screenLooks.set(id, appearance);
+      emit(CORE.clientCharacterLookEvent, id);
     }
-    portraits.request(list)
-  }
-)
+    portraits.request(list);
+  },
+);
 
 on(CORE.clientPlayerLoadedEvent, () => {
-  portraits.clear()
-  screenLooks.clear()
-})
+  portraits.clear();
+  screenLooks.clear();
+});
 on("onResourceStop", (resource: string) => {
-  if (resource === ResourceName) portraits.clear()
-})
+  if (resource === ResourceName) portraits.clear();
+});

@@ -1,31 +1,31 @@
-import { Slider } from "../../../components/ui/slider"
-import { useLang } from "../../../lib/lang"
-import { useAppDispatch, useAppSelector } from "../../../store"
-import { faceFeatureSet } from "../../../store/editor"
-import { focusCamera } from "../actions"
+import { Slider } from "../../../components/ui/slider";
+import { useLang } from "../../../lib/lang";
+import { useAppDispatch, useAppSelector } from "../../../store";
+import { faceFeatureSet } from "../../../store/editor";
+import { focusCamera } from "../actions";
 import {
   axisPosition,
   axisRatio,
   axisValue,
   faceAxis,
   type FaceSliderConfig,
-} from "./faceLayout"
+} from "./faceLayout";
 
-const STEPS = 20
+const STEPS = 20;
 
 /** A single face feature (eyes, cheeks, lips, neck): two-ended slider filling from the centre, double click resets. */
 export function FaceSlider({ slider }: { slider: FaceSliderConfig }) {
-  const t = useLang()
-  const dispatch = useAppDispatch()
+  const t = useLang();
+  const dispatch = useAppDispatch();
   const value = useAppSelector(
-    (state) => state.editor.appearance?.faceFeatures[slider.feature] ?? 0
-  )
-  const axis = faceAxis(slider.invert)
-  const ratio = axisRatio(axis, value)
+    (state) => state.editor.appearance?.faceFeatures[slider.feature] ?? 0,
+  );
+  const axis = faceAxis(slider.invert);
+  const ratio = axisRatio(axis, value);
   const set = (next: number) =>
     next !== value &&
-    dispatch(faceFeatureSet({ id: slider.feature, value: next }))
-  const label = t(`FACE_SINGLE_${slider.key}`)
+    dispatch(faceFeatureSet({ id: slider.feature, value: next }));
+  const label = t(`FACE_SINGLE_${slider.key}`);
 
   return (
     <div
@@ -53,5 +53,5 @@ export function FaceSlider({ slider }: { slider: FaceSliderConfig }) {
         <span>{t(slider.labels.right)}</span>
       </div>
     </div>
-  )
+  );
 }

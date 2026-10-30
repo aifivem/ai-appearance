@@ -1,54 +1,54 @@
-import { useEffect } from "react"
-import { Outlet, useParams } from "@tanstack/react-router"
-import { motion } from "motion/react"
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
-import { faComputerMouse } from "@fortawesome/free-solid-svg-icons"
-import { useNuiEvent } from "fivem-nui-react"
-import { NuiMessage } from "../../../../resource/common/nui"
-import { ScrollArea } from "../../components/ui/scroll-area"
-import { mockOpenData } from "../../dev/mock"
-import { useLang } from "../../lib/lang"
-import { useAppSelector } from "../../store"
-import { cancel, closeEditor, openEditor, toEditorData } from "./actions"
-import { DragSurface } from "./DragSurface"
-import { Footer } from "./Footer"
-import { TAB_INFO, TabBar } from "./TabBar"
-import { isTab } from "./tabs"
+import { useEffect } from "react";
+import { Outlet, useParams } from "@tanstack/react-router";
+import { motion } from "motion/react";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faComputerMouse } from "@fortawesome/free-solid-svg-icons";
+import { useNuiEvent } from "fivem-nui-react";
+import { NuiMessage } from "../../../../resource/common/nui";
+import { ScrollArea } from "../../components/ui/scroll-area";
+import { mockOpenData } from "../../dev/mock";
+import { useLang } from "../../lib/lang";
+import { useAppSelector } from "../../store";
+import { cancel, closeEditor, openEditor, toEditorData } from "./actions";
+import { DragSurface } from "./DragSurface";
+import { Footer } from "./Footer";
+import { TAB_INFO, TabBar } from "./TabBar";
+import { isTab } from "./tabs";
 
 const TITLES = {
   creator: ["UI_TITLE_CREATOR", "UI_SUB_CREATOR"],
   clothing: ["UI_TITLE_CLOTHING", "UI_SUB_CLOTHING"],
   barber: ["UI_TITLE_BARBER", "UI_SUB_BARBER"],
-} as const
+} as const;
 
 // One options object: a new one per render would re-subscribe (and re-fire the browser mock) on every render.
-const OPEN_OPTIONS = { mockData: mockOpenData(), mockDelay: 200 }
+const OPEN_OPTIONS = { mockData: mockOpenData(), mockDelay: 200 };
 
 function onOpen(value: unknown): void {
-  const data = toEditorData(value)
-  if (data) openEditor(data)
+  const data = toEditorData(value);
+  if (data) openEditor(data);
 }
 
 /** Root of the NUI: listens to the client; while open, the title top left, category column and menu on the right, checkout bottom left, all over the game. */
 export function Editor() {
-  const t = useLang()
-  const open = useAppSelector((state) => state.editor.open)
-  const mode = useAppSelector((state) => state.editor.data?.mode)
-  const { tab } = useParams({ strict: false })
+  const t = useLang();
+  const open = useAppSelector((state) => state.editor.open);
+  const mode = useAppSelector((state) => state.editor.data?.mode);
+  const { tab } = useParams({ strict: false });
 
-  useNuiEvent(NuiMessage.open, onOpen, OPEN_OPTIONS)
-  useNuiEvent(NuiMessage.close, closeEditor)
+  useNuiEvent(NuiMessage.open, onOpen, OPEN_OPTIONS);
+  useNuiEvent(NuiMessage.close, closeEditor);
 
   useEffect(() => {
-    if (!open) return
+    if (!open) return;
     const onKey = (event: KeyboardEvent) =>
-      event.key === "Escape" && !event.defaultPrevented && cancel()
-    window.addEventListener("keydown", onKey)
-    return () => window.removeEventListener("keydown", onKey)
-  }, [open])
+      event.key === "Escape" && !event.defaultPrevented && cancel();
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [open]);
 
-  if (!open || !mode) return null
-  const [title, sub] = TITLES[mode]
+  if (!open || !mode) return null;
+  const [title, sub] = TITLES[mode];
 
   return (
     <div className="absolute inset-0 [box-shadow:inset_-1vh_-1vh_20vh_rgba(0,0,0,0.9)]">
@@ -100,5 +100,5 @@ export function Editor() {
 
       <Footer mode={mode} />
     </div>
-  )
+  );
 }

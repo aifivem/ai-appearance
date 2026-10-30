@@ -1,9 +1,9 @@
-import type { ReactNode } from "react"
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
-import { faArrowLeft, faArrowRight } from "@fortawesome/free-solid-svg-icons"
-import { cn } from "../lib/utils"
-import { Button } from "./ui/button"
-import { Slider } from "./ui/slider"
+import type { ReactNode } from "react";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faArrowLeft, faArrowRight } from "@fortawesome/free-solid-svg-icons";
+import { cn } from "../lib/utils";
+import { Button } from "./ui/button";
+import { Slider } from "./ui/slider";
 
 /** Editor form pieces built on the ui/ primitives, in tgiann-clothing's menu look: section, labelled slider, stepper, colour grid. */
 
@@ -12,8 +12,8 @@ export function Section({
   title,
   children,
 }: {
-  title: string
-  children: ReactNode
+  title: string;
+  children: ReactNode;
 }) {
   return (
     <section className="flex flex-col gap-[1.4vh] border-b border-white/10 pb-[2vh] last:border-b-0">
@@ -22,21 +22,21 @@ export function Section({
       </h3>
       <div className="flex flex-col gap-[1.6vh]">{children}</div>
     </section>
-  )
+  );
 }
 
 /** Two controls side by side with a hairline between them; a lone one takes the whole row. */
 export const PAIR_GRID =
-  "grid grid-cols-2 gap-x-[1vh] gap-y-[1.6vh] [&>*:last-child:nth-child(odd)]:col-span-full [&>*:nth-child(odd):not(:last-child)]:border-r [&>*:nth-child(odd):not(:last-child)]:border-white/10 [&>*:nth-child(odd):not(:last-child)]:pr-[1vh]"
+  "grid grid-cols-2 gap-x-[1vh] gap-y-[1.6vh] [&>*:last-child:nth-child(odd)]:col-span-full [&>*:nth-child(odd):not(:last-child)]:border-r [&>*:nth-child(odd):not(:last-child)]:border-white/10 [&>*:nth-child(odd):not(:last-child)]:pr-[1vh]";
 
 interface LabeledSliderProps {
-  label: string
-  value: number
-  min: number
-  max: number
-  onChange: (value: number) => void
-  display?: string
-  onFocus?: () => void
+  label: string;
+  value: number;
+  min: number;
+  max: number;
+  onChange: (value: number) => void;
+  display?: string;
+  onFocus?: () => void;
 }
 
 export function LabeledSlider({
@@ -66,17 +66,17 @@ export function LabeledSlider({
         onValueChange={([v]) => v !== undefined && onChange(v)}
       />
     </div>
-  )
+  );
 }
 
 interface StepperProps {
-  label: string
+  label: string;
   /** Position 0..count-1. */
-  position: number
-  count: number
-  onChange: (position: number) => void
-  display?: string
-  onFocus?: () => void
+  position: number;
+  count: number;
+  onChange: (position: number) => void;
+  display?: string;
+  onFocus?: () => void;
 }
 
 /** An item index: round arrows wrap around, "11 / 18" with the label under it, the slider below jumps through long lists. */
@@ -88,7 +88,7 @@ export function Stepper({
   display,
   onFocus,
 }: StepperProps) {
-  const step = (by: number) => onChange((position + by + count) % count)
+  const step = (by: number) => onChange((position + by + count) % count);
   return (
     <div className="flex min-w-0 flex-col gap-[1vh]" onPointerDown={onFocus}>
       <div className="flex items-center gap-[0.8vh]">
@@ -133,14 +133,14 @@ export function Stepper({
         />
       )}
     </div>
-  )
+  );
 }
 
 interface ColorGridProps {
-  label: string
-  colors: string[]
-  value: number
-  onChange: (index: number) => void
+  label: string;
+  colors: string[];
+  value: number;
+  onChange: (index: number) => void;
 }
 
 export function ColorGrid({ label, colors, value, onChange }: ColorGridProps) {
@@ -164,12 +164,12 @@ export function ColorGrid({ label, colors, value, onChange }: ColorGridProps) {
               "relative aspect-square rounded-full border transition-[box-shadow,border-color] duration-150 before:absolute before:-inset-[0.25vh] before:content-['']",
               index === value
                 ? "border-tgi-green [box-shadow:0_0_0_0.2vh_var(--green)]"
-                : "border-white/15 hover:border-white/50"
+                : "border-white/15 hover:border-white/50",
             )}
             style={{ background: color }}
           />
         ))}
       </div>
     </div>
-  )
+  );
 }

@@ -10,6 +10,6 @@ export const EVENTS = {
   saveCreator: "ai-appearance:saveCreator",
   /** Callback: (shopId, appearance) -> { ok } | { ok: false, error }, pays and saves a shop visit. */
   saveShop: "ai-appearance:saveShop",
-} as const
+} as const;
 
-export type SaveResult = { ok: true } | { ok: false; error: string }
+export type SaveResult = { ok: true } | { ok: false; error: string };

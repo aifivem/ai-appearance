@@ -1,22 +1,22 @@
-import { useState } from "react"
-import type { Parent } from "../../../../../resource/common/nui"
-import { LabeledSlider, Section } from "../../../components/controls"
-import { useLang } from "../../../lib/lang"
-import { cn } from "../../../lib/utils"
-import { useAppDispatch, useAppSelector } from "../../../store"
-import { headBlendSet } from "../../../store/editor"
-import { focusCamera } from "../actions"
+import { useState } from "react";
+import type { Parent } from "../../../../../resource/common/nui";
+import { LabeledSlider, Section } from "../../../components/controls";
+import { useLang } from "../../../lib/lang";
+import { cn } from "../../../lib/utils";
+import { useAppDispatch, useAppSelector } from "../../../store";
+import { headBlendSet } from "../../../store/editor";
+import { focusCamera } from "../actions";
 
 function Portrait({
   parent,
   selected,
   onPick,
 }: {
-  parent: Parent
-  selected: boolean
-  onPick: () => void
+  parent: Parent;
+  selected: boolean;
+  onPick: () => void;
 }) {
-  const [broken, setBroken] = useState(false)
+  const [broken, setBroken] = useState(false);
   return (
     <button
       type="button"
@@ -28,7 +28,7 @@ function Portrait({
         "flex aspect-square overflow-hidden rounded-[1vh] border transition-[border-color,background-color] duration-150 active:[transform:scale(0.96)]",
         selected
           ? "border-tgi-green bg-tgi-green-10"
-          : "border-white/8 bg-white/3 hover:bg-white/6"
+          : "border-white/8 bg-white/3 hover:bg-white/6",
       )}
     >
       {broken ? (
@@ -44,18 +44,18 @@ function Portrait({
         />
       )}
     </button>
-  )
+  );
 }
 
 interface GridProps {
-  title: string
-  parents: Parent[]
-  value: number
-  onPick: (id: number) => void
+  title: string;
+  parents: Parent[];
+  value: number;
+  onPick: (id: number) => void;
 }
 
 function ParentGrid({ title, parents, value, onPick }: GridProps) {
-  const name = parents.find((p) => p.id === value)?.name ?? ""
+  const name = parents.find((p) => p.id === value)?.name ?? "";
   return (
     <section className="flex flex-col gap-[1.4vh] border-b border-white/10 pb-[2vh]">
       <h3 className="flex items-baseline justify-between gap-[1vh]">
@@ -79,17 +79,17 @@ function ParentGrid({ title, parents, value, onPick }: GridProps) {
         ))}
       </div>
     </section>
-  )
+  );
 }
 
 export function HeritageTab() {
-  const t = useLang()
-  const dispatch = useAppDispatch()
-  const mothers = useAppSelector((state) => state.editor.data?.mothers ?? [])
-  const fathers = useAppSelector((state) => state.editor.data?.fathers ?? [])
-  const hb = useAppSelector((state) => state.editor.appearance?.headBlend)
-  if (!hb) return null
-  const focus = () => focusCamera("face")
+  const t = useLang();
+  const dispatch = useAppDispatch();
+  const mothers = useAppSelector((state) => state.editor.data?.mothers ?? []);
+  const fathers = useAppSelector((state) => state.editor.data?.fathers ?? []);
+  const hb = useAppSelector((state) => state.editor.appearance?.headBlend);
+  if (!hb) return null;
+  const focus = () => focusCamera("face");
   return (
     <>
       <ParentGrid
@@ -129,5 +129,5 @@ export function HeritageTab() {
         />
       </Section>
     </>
-  )
+  );
 }

@@ -1,39 +1,39 @@
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faCircleExclamation,
   faDoorOpen,
-} from "@fortawesome/free-solid-svg-icons"
-import { motion } from "motion/react"
-import type { EditorMode } from "../../../../resource/common/nui"
-import { shopChange } from "../../../../resource/common/pricing"
-import { Button } from "../../components/ui/button"
-import { useLang } from "../../lib/lang"
-import { useAppSelector } from "../../store"
-import { cancel, save } from "./actions"
+} from "@fortawesome/free-solid-svg-icons";
+import { motion } from "motion/react";
+import type { EditorMode } from "../../../../resource/common/nui";
+import { shopChange } from "../../../../resource/common/pricing";
+import { Button } from "../../components/ui/button";
+import { useLang } from "../../lib/lang";
+import { useAppSelector } from "../../store";
+import { cancel, save } from "./actions";
 
-const money = (value: number): string => `$${value.toLocaleString("en-US")}`
+const money = (value: number): string => `$${value.toLocaleString("en-US")}`;
 
 /** Checkout dock bottom left (tgiann-clothing): price of the visit (same function the server charges with), the error of a failed save, leave and save. */
 export function Footer({ mode }: { mode: EditorMode }) {
-  const t = useLang()
-  const data = useAppSelector((state) => state.editor.data)
-  const appearance = useAppSelector((state) => state.editor.appearance)
-  const busy = useAppSelector((state) => state.editor.busy)
-  const error = useAppSelector((state) => state.editor.error)
-  if (!data || !appearance) return null
+  const t = useLang();
+  const data = useAppSelector((state) => state.editor.data);
+  const appearance = useAppSelector((state) => state.editor.appearance);
+  const busy = useAppSelector((state) => state.editor.busy);
+  const error = useAppSelector((state) => state.editor.error);
+  if (!data || !appearance) return null;
 
   const changes =
     mode === "creator"
       ? 0
-      : shopChange(mode, data.appearance, appearance).changes
+      : shopChange(mode, data.appearance, appearance).changes;
   const total =
-    mode === "clothing" ? changes * data.price : changes > 0 ? data.price : 0
+    mode === "clothing" ? changes * data.price : changes > 0 ? data.price : 0;
   const label =
     mode === "creator"
       ? t("UI_FINISH")
       : total > 0
         ? t("UI_PAY", money(total))
-        : t("UI_SAVE")
+        : t("UI_SAVE");
 
   return (
     <motion.footer
@@ -94,5 +94,5 @@ export function Footer({ mode }: { mode: EditorMode }) {
         </Button>
       </div>
     </motion.footer>
-  )
+  );
 }

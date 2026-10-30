@@ -1,26 +1,26 @@
-import type { ComponentProps } from "react"
-import { Slider as SliderPrimitive } from "radix-ui"
-import { cn } from "../../lib/utils"
+import type { ComponentProps } from "react";
+import { Slider as SliderPrimitive } from "radix-ui";
+import { cn } from "../../lib/utils";
 
 interface SliderProps extends ComponentProps<typeof SliderPrimitive.Root> {
   /** Value the accent fill grows from (a two-ended slider fills from its centre); default the minimum. */
-  origin?: number
+  origin?: number;
 }
 
 /** Radix slider, TGIANN look: 0.6vh white-alpha track, green fill, white round thumb with a 2.8vh hit area. */
 export function Slider({ className, origin, ...props }: SliderProps) {
-  const min = props.min ?? 0
-  const max = props.max ?? 100
-  const value = props.value?.[0] ?? min
-  const span = max - min || 1
-  const from = ((origin ?? min) - min) / span
-  const to = (value - min) / span
+  const min = props.min ?? 0;
+  const max = props.max ?? 100;
+  const value = props.value?.[0] ?? min;
+  const span = max - min || 1;
+  const from = ((origin ?? min) - min) / span;
+  const to = (value - min) / span;
   return (
     <SliderPrimitive.Root
       data-slot="slider"
       className={cn(
         "relative flex h-[2vh] w-full cursor-pointer touch-none items-center select-none data-[disabled]:opacity-40",
-        className
+        className,
       )}
       {...props}
     >
@@ -55,5 +55,5 @@ export function Slider({ className, origin, ...props }: SliderProps) {
         className="relative z-[1] block size-[1.6vh] cursor-grab rounded-full bg-white transition-[box-shadow] duration-150 outline-none after:absolute after:-inset-[0.6vh] after:content-[''] hover:[box-shadow:0_0_0_0.4vh_var(--green-20)] focus-visible:[box-shadow:0_0_0_0.4vh_var(--green-40)] active:cursor-grabbing"
       />
     </SliderPrimitive.Root>
-  )
+  );
 }

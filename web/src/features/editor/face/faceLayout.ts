@@ -4,20 +4,20 @@
  * most "up" and "right" ends negative); `minY` limits the vertical axis (chin cleft runs 0..10).
  */
 export interface FacePlaneConfig {
-  key: string
-  x: number
-  y: number
-  labels: { top: string; bottom: string; left: string; right: string }
-  invertX?: boolean
-  invertY?: boolean
-  minY?: number
+  key: string;
+  x: number;
+  y: number;
+  labels: { top: string; bottom: string; left: string; right: string };
+  invertX?: boolean;
+  invertY?: boolean;
+  minY?: number;
 }
 
 export interface FaceSliderConfig {
-  key: string
-  feature: number
-  labels: { left: string; right: string }
-  invert?: boolean
+  key: string;
+  feature: number;
+  labels: { left: string; right: string };
+  invert?: boolean;
 }
 
 export const FACE_PLANES: FacePlaneConfig[] = [
@@ -120,7 +120,7 @@ export const FACE_PLANES: FacePlaneConfig[] = [
     invertY: true,
     minY: 0,
   },
-]
+];
 
 export const FACE_SLIDERS: FaceSliderConfig[] = [
   {
@@ -146,29 +146,29 @@ export const FACE_SLIDERS: FaceSliderConfig[] = [
     feature: 19,
     labels: { left: "PAD_THIN", right: "PAD_THICK" },
   },
-]
+];
 
 /** One axis of a plane or slider: the value at the left / bottom end and at the right / top end. */
 export interface FaceAxis {
-  from: number
-  to: number
+  from: number;
+  to: number;
 }
 
-const MIN = -10
-const MAX = 10
+const MIN = -10;
+const MAX = 10;
 
 export function faceAxis(invert = false, min = MIN): FaceAxis {
-  return invert ? { from: MAX, to: min } : { from: min, to: MAX }
+  return invert ? { from: MAX, to: min } : { from: min, to: MAX };
 }
 
 /** 0..1 position of a value on the axis. */
 export const axisRatio = (axis: FaceAxis, value: number): number =>
-  Math.min(1, Math.max(0, (value - axis.from) / (axis.to - axis.from || 1)))
+  Math.min(1, Math.max(0, (value - axis.from) / (axis.to - axis.from || 1)));
 
 /** The value at a 0..1 position. */
 export const axisValue = (axis: FaceAxis, ratio: number): number =>
-  Math.round(axis.from + ratio * (axis.to - axis.from))
+  Math.round(axis.from + ratio * (axis.to - axis.from));
 
 /** Position shown to the player on a -10..10 scale, centre 0. */
 export const axisPosition = (ratio: number): number =>
-  Math.round(ratio * 20 - 10)
+  Math.round(ratio * 20 - 10);
