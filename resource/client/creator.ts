@@ -1,4 +1,5 @@
 import {
+  fadeIn,
   fadeOut,
   onServerEvent,
   player,
@@ -26,7 +27,7 @@ async function runCreator(start: Appearance): Promise<void> {
   await player.teleport(c, { heading: c.heading, fade: false });
   const ped = await ensurePlayerModel(start.model);
   applyAppearance(ped, start);
-  DoScreenFadeIn(500);
+  await fadeIn(500);
   await editor.open("creator", start);
   await player.teleport(back, { heading: backHeading, ground: false });
 }
@@ -37,6 +38,6 @@ onServerEvent(
   (start) =>
     runCreator(start).catch((error: unknown) => {
       log.error("character creator failed", error);
-      DoScreenFadeIn(0);
+      void fadeIn(0);
     }),
 );

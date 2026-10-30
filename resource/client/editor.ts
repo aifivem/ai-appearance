@@ -117,7 +117,7 @@ class Editor {
         worn: appearance,
         done,
       };
-      FreezeEntityPosition(ped, true);
+      player.freeze(true);
       hud.hide("editor");
       this.camera.start(ped, mode === "clothing" ? "body" : "face");
       SetNuiFocus(true, true);
