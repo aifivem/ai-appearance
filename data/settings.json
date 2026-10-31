@@ -16,13 +16,13 @@
   ],
   "blips": {
     "clothing": {
-      "sprite": 73,
+      "sprite": 366,
       "color": 47,
       "scale": 0.7
     },
     "barber": {
       "sprite": 71,
-      "color": 47,
+      "color": 0,
       "scale": 0.7
     }
   }

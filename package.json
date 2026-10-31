@@ -7,7 +7,7 @@
   "author": {
     "name": "TGIANN"
   },
-  "repository": "github:TGIANN/ai-appearance",
+  "repository": "github:aifivem/ai-appearance",
   "type": "module",
   "fxDependencies": [
     "/onesync",
