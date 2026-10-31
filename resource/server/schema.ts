@@ -23,7 +23,10 @@ export const appearanceSchema: PanelSchema = {
         creator: { type: "vec4" },
         prices: {
           type: "object",
-          fields: { clothing: spec.int(0, 1_000_000), barber: spec.int(0, 1_000_000) },
+          fields: {
+            clothing: spec.int(0, 1_000_000),
+            barber: spec.int(0, 1_000_000),
+          },
         },
         accounts: {
           type: "names",

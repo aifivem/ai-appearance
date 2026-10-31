@@ -1,7 +1,7 @@
 import {
   cache,
-  hud,
   loadLocaleTexts,
+  NuiScreen,
   player,
   triggerServerCallback,
 } from "@aicore-fivem/lib/client";
@@ -55,6 +55,9 @@ interface Session {
   worn: Appearance;
   done: (saved: boolean) => void;
 }
+
+/** The editor page: only the editor closes it (save or cancel; the creator cannot be left). */
+const page = new NuiScreen("editor", { closeCallback: false });
 
 /** The look editor (creator, clothing shop, barber) on the player's own ped. */
 class Editor {
@@ -118,10 +121,8 @@ class Editor {
         done,
       };
       player.freeze(true);
-      hud.hide("editor");
       this.camera.start(ped, mode === "clothing" ? "body" : "face");
-      SetNuiFocus(true, true);
-      SendNUIMessage({ action: NuiMessage.open, data });
+      page.open({ action: NuiMessage.open, data });
       for (const listener of this.listeners) listener();
     });
   }
@@ -182,11 +183,9 @@ class Editor {
     const s = this.session;
     if (!s) return;
     this.session = null;
-    SetNuiFocus(false, false);
-    SendNUIMessage({ action: NuiMessage.close });
+    page.close();
     this.camera.stop();
     player.freeze(false);
-    hud.show("editor");
     if (s.mode === "creator")
       SetStreamedTextureDictAsNoLongerNeeded(PORTRAIT_DICT);
     s.done(saved);
