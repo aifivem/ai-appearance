@@ -1,9 +1,9 @@
 import { onServerEvent, registerExport } from "@aicore-fivem/lib/client";
 import { asArgs, waitFor } from "@aicore-fivem/lib/shared";
-import { CORE } from "@aicore-fivem/shared";
+import { CORE, toJobOutfit } from "@aicore-fivem/shared";
 import { toAppearance, type Appearance } from "common/appearance";
 import { EVENTS } from "common/events";
-import { applyAppearance, ensurePlayerModel } from "./skin";
+import { applyAppearance, applyOutfit, ensurePlayerModel } from "./skin";
 
 /** The look the loaded character wears (the server's copy); shops start from it. */
 class Look {
@@ -55,3 +55,14 @@ registerExport("ApplyAppearance", (ped: unknown, raw: unknown): boolean => {
 registerExport("GetPedAppearance", (ped: unknown): Appearance | null =>
   ped === PlayerPedId() ? look.current : null,
 );
+
+/** `WearOutfit(outfit)`: a job outfit (ai-core's appearance layer) on the player until `ReloadSkin`; never saved. */
+registerExport("WearOutfit", (raw: unknown) => {
+  const outfit = toJobOutfit(raw);
+  if (outfit && look.current) applyOutfit(PlayerPedId(), outfit);
+});
+
+/** `ReloadSkin()`: the character's saved look back on the player (takes a job outfit off). */
+registerExport("ReloadSkin", () => {
+  if (look.current) applyAppearance(PlayerPedId(), look.current);
+});

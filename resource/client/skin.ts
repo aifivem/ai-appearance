@@ -1,4 +1,5 @@
 import { requestModel } from "@aicore-fivem/lib/client";
+import type { JobOutfit } from "@aicore-fivem/shared";
 import {
   COMPONENTS,
   HAIR_COLOURED_OVERLAYS,
@@ -104,6 +105,13 @@ export function applyAppearance(ped: number, a: Appearance): void {
   for (let id = 1; id < COMPONENTS; id++)
     applyComponent(ped, id, a.components[id]!);
   for (const id of PROP_IDS) applyProp(ped, id, a.props[id]!);
+}
+
+/** A job outfit's pieces on a ped (the rest stays); hair (component 2) is never part of an outfit. */
+export function applyOutfit(ped: number, outfit: JobOutfit): void {
+  for (const p of outfit.components)
+    if (p.id !== 2) applyComponent(ped, p.id, p);
+  for (const p of outfit.props) applyProp(ped, p.id, p);
 }
 
 /** Only the parts that differ between `prev` (what the ped wears) and `next`: cheap enough for slider drags. */

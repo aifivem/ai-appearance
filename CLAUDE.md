@@ -20,7 +20,7 @@ Character looks: the creator a new character goes through, clothing stores, barb
 ## Contracts
 
 - Net events and callbacks: `resource/common/events.ts`; NUI contract: `resource/common/nui.ts`.
-- Characters through lib `onCharacter` (dress or create), ai-core's `characterScreen` (portraits); emits client event `ai-core:client:characterPortrait (charId, url)`; client exports `ApplyAppearance(ped, appearance)` (an `Appearance` on a ped of its model, false otherwise) and `GetPedAppearance(ped)` (the local player's look, null for others), typed `AiAppearanceClientExports` in `@aicore-fivem/shared` and used only by ai-core's adapter.
+- Characters through lib `onCharacter` (dress or create), ai-core's `characterScreen` (portraits); emits client event `ai-core:client:characterPortrait (charId, url)`; client exports `ApplyAppearance(ped, appearance)` (an `Appearance` on a ped of its model, false otherwise), `GetPedAppearance(ped)` (the local player's look, null for others), `WearOutfit(outfit)` (ai-core's job outfit pieces on the player, never saved: no outfit menu of its own) and `ReloadSkin()` (the saved look back on), typed `AiAppearanceClientExports` in `@aicore-fivem/shared` and used only by ai-core's adapter.
 - Table `ai_appearance_characters` (`char_id` = `ai_core_characters.id`, `data` = Appearance JSON).
 - Panel content `data/settings.json` (creator point, prices, pay accounts, blips: `blip` widgets) and `data/shops.json` (`{ type, coords, radius, blip }`); both are in `files` and mirrored by the client's `AdminWorld`.
 - Log channel `purchases`.
