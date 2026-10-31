@@ -2,6 +2,7 @@ import { asArgs, fail, readText } from "@aicore-fivem/lib/shared";
 import {
   aiLog,
   buckets,
+  coordsOf,
   onCharacter,
   onClientCallback,
   PlayerMap,
@@ -129,7 +130,7 @@ onClientCallback(
     const wearer = wearers.get(source);
     const shop = content.shops.get(shopId);
     if (!wearer || wearer.creating || !shop) return BUSY;
-    const [x = 0, y = 0, z = 0] = GetEntityCoords(GetPlayerPed(String(source)));
+    const { x, y, z } = coordsOf(source);
     if (!insideShop(shop, x, y, z)) return fail("APPEARANCE_ERR_FAR");
     if (next.model !== wearer.appearance.model)
       return fail("APPEARANCE_ERR_INVALID");

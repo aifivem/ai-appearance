@@ -1,4 +1,4 @@
-import { cache, onCache, Points } from "@aicore-fivem/lib/client";
+import { cache, medical, onCache, Points } from "@aicore-fivem/lib/client";
 import { RecordObjects } from "@aicore-fivem/lib/shared";
 import { readShop, type ShopType } from "common/content";
 import { Locale } from "common";
@@ -41,7 +41,7 @@ const shops = new RecordObjects(world, "shops", readShop, (id, shop) => {
         }
       : undefined,
     canShow: () =>
-      !editor.isOpen && cache.vehicle === false && !IsEntityDead(cache.ped),
+      !editor.isOpen && cache.vehicle === false && !medical.isDead(),
     onPressed: () => look.current && editor.open(shop.type, look.current, id),
   });
   return () => points.remove(id);

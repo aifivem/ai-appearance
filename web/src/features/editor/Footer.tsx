@@ -10,8 +10,9 @@ import { Button } from "../../components/ui/button";
 import { useLang } from "../../lib/lang";
 import { useAppSelector } from "../../store";
 import { cancel, save } from "./actions";
+import { groupDigits } from "@aicore-fivem/lib/shared";
 
-const money = (value: number): string => `$${value.toLocaleString("en-US")}`;
+const money = (value: number): string => `$${groupDigits(value)}`;
 
 /** Checkout dock bottom left (tgiann-clothing): price of the visit (same function the server charges with), the error of a failed save, leave and save. */
 export function Footer({ mode }: { mode: EditorMode }) {

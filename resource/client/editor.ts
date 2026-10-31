@@ -195,28 +195,15 @@ class Editor {
 
 export const editor = new Editor();
 
-type NuiReply = (value: unknown) => void;
-
-RegisterNuiCallback(NuiCallback.preview, (data: unknown, cb: NuiReply) => {
-  editor.preview(data);
-  cb(true);
-});
-RegisterNuiCallback(NuiCallback.camera, (data: unknown, cb: NuiReply) => {
-  editor.focus(data);
-  cb(true);
-});
-RegisterNuiCallback(NuiCallback.drag, (data: unknown, cb: NuiReply) => {
-  editor.drag(data);
-  cb(true);
-});
-RegisterNuiCallback(NuiCallback.zoom, (data: unknown, cb: NuiReply) => {
-  editor.zoom(data);
-  cb(true);
-});
-RegisterNuiCallback(NuiCallback.save, (data: unknown, cb: NuiReply) => {
-  editor.save(data).then(cb, () => cb(BUSY));
-});
-RegisterNuiCallback(NuiCallback.cancel, (_data: unknown, cb: NuiReply) => {
-  editor.cancel();
-  cb(true);
-});
+// The editor's own methods read the raw page data.
+const raw = (data: unknown) => data;
+page.on(NuiCallback.preview, raw, (data) => editor.preview(data));
+page.on(NuiCallback.camera, raw, (data) => editor.focus(data));
+page.on(NuiCallback.drag, raw, (data) => editor.drag(data));
+page.on(NuiCallback.zoom, raw, (data) => editor.zoom(data));
+page.on(NuiCallback.save, raw, (data) => editor.save(data).catch(() => BUSY));
+page.on(
+  NuiCallback.cancel,
+  (data) => data ?? true,
+  () => editor.cancel(),
+);

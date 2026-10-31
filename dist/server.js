@@ -67,7 +67,7 @@ function readText(value, max) {
 const fail = (error) => ({
 	ok: !1,
 	error
-}), isPublic = (rule) => rule.jobs.length === 0 && rule.gangs.length === 0, BLIP_STYLE_FIELDS = {
+}), flatDistance = (a, b) => Math.hypot(a.x - b.x, a.y - b.y), isPublic = (rule) => rule.jobs.length === 0 && rule.gangs.length === 0, BLIP_STYLE_FIELDS = {
 	sprite: {
 		type: "number",
 		min: 0,
@@ -368,6 +368,8 @@ const CORE = {
 	vehicleTypeCallback: "ai-core:vehicleType",
 	interactionStateKey: "ai:interaction",
 	pvpStateKey: "ai:pvp",
+	medicalStateKey: "ai:medical",
+	clientDeadEvent: "ai-core:client:dead",
 	charactersCallback: "ai-core:characters",
 	createCharacterCallback: "ai-core:createCharacter",
 	deleteCharacterCallback: "ai-core:deleteCharacter",
@@ -425,6 +427,16 @@ function loadLocaleTexts(resource = GetCurrentResourceName()) {
 }
 // ../../../packages/lib/src/fivem/callbackNames.ts
 const requestEvent = (name) => `aicore:cb:${name}`, responseEvent = (resource) => `aicore:cbr:${resource}`;
+// ../../../packages/lib/src/server/position.ts
+function entityCoords(entity) {
+	let [x = 0, y = 0, z = 0] = GetEntityCoords(entity);
+	return {
+		x,
+		y,
+		z
+	};
+}
+const coordsOf = (source) => entityCoords(GetPlayerPed(String(source)));
 resourceExport(CORE.resource);
 const log$6 = createLogger(GetCurrentResourceName()), gates = new Set();
 on("playerDropped", () => {
@@ -1057,6 +1069,9 @@ var OnlinePlayers = class {
 	character(source) {
 		return this.start(), this.players.get(source)?.character ?? null;
 	}
+	charId(source) {
+		return this.start(), this.players.get(source)?.character.id;
+	}
 	name(source, options = {}) {
 		let c = this.character(source);
 		return c ? `${c.firstname} ${c.lastname}` : options.fallback === !1 ? "" : GetPlayerName(String(source));
@@ -1138,19 +1153,19 @@ function onCharacter(handlers) {
 		} catch (error) {
 			log$4.error(`character loaded handler failed for ${source}`, error);
 		}
-	}, end = (source, charId) => {
+	}, end = (source, charId, reason) => {
 		if (live.delete(source)) try {
-			handlers.unloaded?.(source, charId);
+			handlers.unloaded?.(source, charId, reason);
 		} catch (error) {
 			log$4.error(`character unloaded handler failed for ${source}`, error);
 		}
 	};
 	on(CORE.playerLoadedEvent, (source, character) => {
 		let previous = live.get(source);
-		previous !== void 0 && end(source, previous), deliver(source, character);
-	}), on(CORE.playerUnloadedEvent, (source, charId) => end(source, charId)), onDropped((source) => setImmediate(() => {
+		previous !== void 0 && end(source, previous, "switch"), deliver(source, character);
+	}), on(CORE.playerUnloadedEvent, (source, charId, reason) => end(source, charId, reason === "dropped" ? "dropped" : "switch")), onDropped((source) => setImmediate(() => {
 		let charId = live.get(source);
-		charId !== void 0 && end(source, charId);
+		charId !== void 0 && end(source, charId, "dropped");
 	})), setImmediate(() => {
 		for (let source of online.sources()) {
 			if (live.has(source)) continue;
@@ -15763,7 +15778,10 @@ function readShop(id, v) {
 	};
 }
 function insideShop(shop, x, y, z) {
-	return Math.hypot(x - shop.x, y - shop.y) <= shop.radius && Math.abs(z - shop.z) <= 4;
+	return flatDistance({
+		x,
+		y
+	}, shop) <= shop.radius && Math.abs(z - shop.z) <= 4;
 }
 var AppearanceContent = class {
 	settingsView;
@@ -16103,7 +16121,7 @@ onClientCallback(EVENTS.saveShop, {
 }, async (source, shopId, next) => {
 	let wearer = wearers.get(source), shop = content.shops.get(shopId);
 	if (!wearer || wearer.creating || !shop) return BUSY;
-	let [x = 0, y = 0, z = 0] = GetEntityCoords(GetPlayerPed(String(source)));
+	let { x, y, z } = coordsOf(source);
 	if (!insideShop(shop, x, y, z)) return fail("APPEARANCE_ERR_FAR");
 	if (next.model !== wearer.appearance.model) return fail("APPEARANCE_ERR_INVALID");
 	let { appearance, changes } = shopChange(shop.type, wearer.appearance, next);

@@ -1,6 +1,7 @@
 import {
   cache,
   onServerEvent,
+  onStop,
   pedHeadshot,
   requestModel,
 } from "@aicore-fivem/lib/client";
@@ -115,6 +116,4 @@ onServerEvent(
 );
 
 on(CORE.clientPlayerLoadedEvent, () => portraits.clear());
-on("onResourceStop", (resource: string) => {
-  if (resource === ResourceName) portraits.clear();
-});
+onStop(() => portraits.clear());

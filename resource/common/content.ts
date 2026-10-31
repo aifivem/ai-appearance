@@ -1,5 +1,6 @@
 import {
   bool,
+  flatDistance,
   int,
   num,
   type PlacePed,
@@ -106,8 +107,7 @@ export function insideShop(
   z: number,
 ): boolean {
   return (
-    Math.hypot(x - shop.x, y - shop.y) <= shop.radius &&
-    Math.abs(z - shop.z) <= 4
+    flatDistance({ x, y }, shop) <= shop.radius && Math.abs(z - shop.z) <= 4
   );
 }
 
