@@ -2,7 +2,7 @@ import type { ComponentProps } from "react";
 import { Tooltip as TooltipPrimitive } from "radix-ui";
 import { cn } from "../../lib/utils";
 
-/** Radix tooltip, TGIANN floating surface (tgiann-ui components.md): #161616, ring, small text, no arrow. */
+/** Radix tooltip, TGIANN floating surface (aicore-ui): #161616, ring, small text, no arrow. */
 export const TooltipProvider = TooltipPrimitive.Provider;
 export const Tooltip = TooltipPrimitive.Root;
 export const TooltipTrigger = TooltipPrimitive.Trigger;
