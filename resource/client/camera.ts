@@ -1,4 +1,4 @@
-import { raycast, TickLoop } from "@aicore-fivem/lib/client";
+import { raycast, ScriptCamera, TickLoop } from "@aicore-fivem/lib/client";
 import { distance } from "@aicore-fivem/lib/shared";
 import type { CameraZone } from "common/nui";
 
@@ -39,7 +39,7 @@ const HEAD_BONE = 31086;
 
 /** The editor's scripted camera: framings per body part, smooth moves, drag to turn the ped, wheel to zoom. */
 export class EditorCamera {
-  private cam: number | null = null;
+  private readonly camera = new ScriptCamera();
   private ped = 0;
   private heading = 0;
   private headHeight = 0.65;
@@ -62,25 +62,19 @@ export class EditorCamera {
     this.ped = ped;
     this.heading = GetEntityHeading(ped);
     this.setFrame(zone);
-    this.cam = CreateCam("DEFAULT_SCRIPTED_CAMERA", true);
     this.current = null;
     this.step(true);
-    SetCamActive(this.cam, true);
-    RenderScriptCams(true, false, 0, true, true);
     this.loop.set(true);
   }
 
   stop(): void {
     this.loop.set(false);
-    if (this.cam === null) return;
-    RenderScriptCams(false, false, 0, true, true);
-    DestroyCam(this.cam, false);
-    this.cam = null;
+    this.camera.stop();
   }
 
   /** Moves to a body part's framing; zoom and pan start over, the ped's turn stays. */
   focus(zone: CameraZone): void {
-    if (this.cam === null || this.frame === FRAMES[zone]) return;
+    if (!this.camera.active || this.frame === FRAMES[zone]) return;
     this.setFrame(zone);
   }
 
@@ -94,7 +88,7 @@ export class EditorCamera {
 
   /** Drag in screen fractions: sideways turns the ped, up and down move the camera. */
   drag(x: number, y: number): void {
-    if (this.cam === null) return;
+    if (!this.camera.active) return;
     SetEntityHeading(
       this.ped,
       GetEntityHeading(this.ped) + x * TURN_PER_SCREEN,
@@ -114,8 +108,9 @@ export class EditorCamera {
     this.headHeight = (headZ ?? 0) - (rootZ ?? 0);
   }
 
+  /** `snap`: jump to the framing and start the camera (from `start`); else ease towards it. */
   private step(snap: boolean): void {
-    if (this.cam === null) return;
+    if (!snap && !this.camera.active) return;
     const f = this.frame;
     const [rx = 0, ry = 0, rz = 0] = GetEntityCoords(this.ped, false);
     const base = f.head ? this.headHeight : 0;
@@ -160,8 +155,12 @@ export class EditorCamera {
     c.fov += (f.fov - c.fov) * follow;
     this.current = c;
 
-    SetCamCoord(this.cam, c.x, c.y, c.z);
-    PointCamAtCoord(this.cam, c.lx, c.ly, c.lz);
-    SetCamFov(this.cam, c.fov);
+    const at = { x: c.x, y: c.y, z: c.z };
+    const pointAt = { x: c.lx, y: c.ly, z: c.lz };
+    if (snap) this.camera.start(at, { pointAt, fov: c.fov });
+    else {
+      this.camera.move(at, { pointAt });
+      this.camera.setFov(c.fov);
+    }
   }
 }

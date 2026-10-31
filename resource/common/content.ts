@@ -78,28 +78,24 @@ export function readSettings(raw: unknown): Settings {
   };
 }
 
-export function readShops(raw: unknown): Map<string, Shop> {
-  const shops = new Map<string, Shop>();
-  for (const [id, value] of Object.entries(record(raw))) {
-    const v = record(value);
-    const c = record(v.coords);
-    if (
-      !/^[a-z0-9_]{2,32}$/.test(id) ||
-      (v.type !== "clothing" && v.type !== "barber")
-    )
-      continue;
-    shops.set(id, {
-      id,
-      type: v.type,
-      x: num(c.x, 0),
-      y: num(c.y, 0),
-      z: num(c.z, 0),
-      radius: num(v.radius, 5, 1, 30),
-      blip: bool(v.blip, true),
-      ped: readPlacePed(v.ped),
-    });
-  }
-  return shops;
+/** One shop record (`records` / `RecordObjects` reader); null for a bad id or type. */
+export function readShop(id: string, v: Record<string, unknown>): Shop | null {
+  const c = record(v.coords);
+  if (
+    !/^[a-z0-9_]{2,32}$/.test(id) ||
+    (v.type !== "clothing" && v.type !== "barber")
+  )
+    return null;
+  return {
+    id,
+    type: v.type,
+    x: num(c.x, 0),
+    y: num(c.y, 0),
+    z: num(c.z, 0),
+    radius: num(v.radius, 5, 1, 30),
+    blip: bool(v.blip, true),
+    ped: readPlacePed(v.ped),
+  };
 }
 
 /** Whether a point is inside a shop (ground distance within the radius, a floor or two of height). */
@@ -117,35 +113,24 @@ export function insideShop(
 
 /** Where the content comes from: the server's AdminPanel or a client's AdminWorld (both have these two). */
 interface ContentSource {
-  get(file: string): unknown;
-  onChange(file: string, handler: () => void): void;
+  view<T>(file: string, parse: (raw: unknown) => T): { readonly value: T };
+  records<T>(
+    file: string,
+    readOne: (key: string, raw: Record<string, unknown>) => T | null,
+  ): ReadonlyMap<string, T>;
 }
 
-/** Settings and shops, read once and again after every panel change. */
+/** Settings and shops, kept current by the panel views (one shop re-read per edit). */
 export class AppearanceContent {
-  settings: Settings;
-  shops: Map<string, Shop>;
-  private readonly listeners: Array<() => void> = [];
+  private readonly settingsView: { readonly value: Settings };
+  readonly shops: ReadonlyMap<string, Shop>;
 
   constructor(source: ContentSource) {
-    this.settings = readSettings(source.get("settings"));
-    this.shops = readShops(source.get("shops"));
-    source.onChange("settings", () => {
-      this.settings = readSettings(source.get("settings"));
-      this.notify();
-    });
-    source.onChange("shops", () => {
-      this.shops = readShops(source.get("shops"));
-      this.notify();
-    });
+    this.settingsView = source.view("settings", readSettings);
+    this.shops = source.records("shops", readShop);
   }
 
-  /** Runs after any change (blips, prompts). */
-  subscribe(listener: () => void): void {
-    this.listeners.push(listener);
-  }
-
-  private notify(): void {
-    for (const listener of this.listeners) listener();
+  get settings(): Settings {
+    return this.settingsView.value;
   }
 }
