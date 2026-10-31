@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.1](https://github.com/aifivem/ai-appearance/compare/v0.2.0...v0.2.1) (2026-10-31)
+
+
+### Miscellaneous Chores
+
+* rebuild with the current lib ([1187387](https://github.com/aifivem/ai-appearance/commit/1187387363ae2defce84f5c55405e44831f12df8))
+
 ## [0.2.0](https://github.com/aifivem/ai-appearance/compare/v0.1.0...v0.2.0) (2026-10-31)
 
 
