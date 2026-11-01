@@ -4,20 +4,20 @@ import {
   createRoute,
   createRouter,
 } from "@tanstack/react-router";
-import { Editor } from "./features/editor/Editor";
-import { TabContent } from "./features/editor/TabContent";
 
-/** Which tab is open lives in the router (memory history: NUI has no url); the browser preview seeds it from the hash. */
-const rootRoute = createRootRoute({ component: Editor });
+/**
+ * Which tab is open lives in the router (memory history: NUI has no url); the browser preview seeds it from the hash.
+ * The screens are attached in `features/editor/routes.ts`: they import the actions that navigate through this router.
+ */
+export const rootRoute = createRootRoute();
 const indexRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/",
   component: () => null,
 });
-const tabRoute = createRoute({
+export const tabRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/$tab",
-  component: TabContent,
 });
 
 const start = window.location.hash.startsWith("#/")

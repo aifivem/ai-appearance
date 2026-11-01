@@ -1,7 +1,8 @@
 import { createDatabaseTables } from "@aicore-fivem/lib/server";
 import { mysql } from "@aicore-fivem/mysql";
 import { ResourceName } from "common";
-import { toAppearance, type Appearance } from "common/appearance";
+import type { Appearance } from "common/appearance";
+import { toAppearance } from "common/appearanceParser";
 import { log } from "./log";
 
 /** Our table exists (installed at start); reads wait for it. */

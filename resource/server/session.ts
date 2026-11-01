@@ -1,6 +1,7 @@
 import { asArgs, fail, readText } from "@aicore-fivem/lib/shared";
 import {
   aiLog,
+  aiLogChannels,
   buckets,
   coordsOf,
   onCharacter,
@@ -9,7 +10,9 @@ import {
   resourceExport,
 } from "@aicore-fivem/lib/server";
 import { CORE, type CharacterInfo } from "@aicore-fivem/shared";
-import { defaultAppearance, MODELS, toAppearance } from "common/appearance";
+import { MODELS } from "common/appearance";
+import { toAppearance } from "common/appearanceParser";
+import { defaultAppearance } from "common/defaultAppearance";
 import { insideShop } from "common/content";
 import { EVENTS, type SaveResult } from "common/events";
 import { shopChange } from "common/pricing";
@@ -17,6 +20,8 @@ import { log } from "./log";
 import { content } from "./content";
 import { loadAppearances, saveAppearance, tablesReady } from "./repo";
 import { Wearer, wearers } from "./wearers";
+
+aiLogChannels({ purchases: {} });
 
 const core = resourceExport("ai-core");
 const BUSY = fail("APPEARANCE_ERR_BUSY");

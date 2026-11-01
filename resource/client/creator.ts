@@ -6,11 +6,12 @@ import {
   resourceExport,
 } from "@aicore-fivem/lib/client";
 import { asArgs, createLogger, waitFor } from "@aicore-fivem/lib/shared";
-import { toAppearance, type Appearance } from "common/appearance";
+import type { Appearance } from "common/appearance";
+import { toAppearance } from "common/appearanceParser";
 import { EVENTS } from "common/events";
 import { ResourceName } from "common";
 import { content } from "./content";
-import { editor } from "./editor";
+import { editor } from "./editor/editor";
 import { applyAppearance, ensurePlayerModel } from "./skin";
 
 const log = createLogger(ResourceName);

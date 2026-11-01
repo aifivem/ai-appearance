@@ -3,7 +3,7 @@ import { RecordObjects } from "@aicore-fivem/lib/shared";
 import { readShop, type ShopType } from "common/content";
 import { Locale } from "common";
 import { content, world } from "./content";
-import { editor } from "./editor";
+import { editor } from "./editor/editor";
 import { look } from "./look";
 
 const PROMPT: Record<ShopType, "HELP_CLOTHING" | "HELP_BARBER"> = {

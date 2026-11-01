@@ -1,37 +1,22 @@
 import {
   cache,
-  loadLocaleTexts,
   NuiScreen,
   player,
   triggerServerCallback,
 } from "@aicore-fivem/lib/client";
 import { fail, isRecord, replyError } from "@aicore-fivem/lib/shared";
-import {
-  CLOTHING_COMPONENTS,
-  HAIR_COMPONENT,
-  OVERLAYS,
-  PROP_IDS,
-  toAppearance,
-  type Appearance,
-} from "common/appearance";
+import { toAppearance } from "common/appearanceParser";
+import type { Appearance } from "common/appearance";
 import { EVENTS, type SaveResult } from "common/events";
-import {
-  NuiCallback,
-  NuiMessage,
-  type CameraZone,
-  type EditorData,
-  type EditorMode,
-  type Item,
-} from "common/nui";
-import { FATHERS, MOTHERS, PORTRAIT_DICT } from "common/parents";
+import { NuiMessage, type CameraZone, type EditorMode } from "common/nui";
+import { PORTRAIT_DICT } from "common/parents";
 import { shopChange } from "common/pricing";
-import { EditorCamera } from "./camera";
-import { catalog } from "./catalog";
-import { content } from "./content";
-import { look } from "./look";
-import { applyChanges } from "./skin";
+import { EditorCamera } from "../camera";
+import { look } from "../look";
+import { applyChanges } from "../skin";
+import { editorData } from "./editorData";
 
-const BUSY = fail("APPEARANCE_ERR_BUSY");
+export const BUSY = fail("APPEARANCE_ERR_BUSY");
 const ZONES: readonly string[] = [
   "face",
   "head",
@@ -39,13 +24,6 @@ const ZONES: readonly string[] = [
   "body",
   "feet",
 ] satisfies CameraZone[];
-
-const hex = ([r, g, b]: [number, number, number]): string =>
-  `#${[r, g, b].map((v) => v.toString(16).padStart(2, "0")).join("")}`;
-const palette = (
-  count: number,
-  rgb: (i: number) => [number, number, number],
-): string[] => Array.from({ length: count }, (_, i) => hex(rgb(i)));
 
 interface Session {
   mode: EditorMode;
@@ -57,7 +35,7 @@ interface Session {
 }
 
 /** The editor page: only the editor closes it (save or cancel; the creator cannot be left). */
-const page = new NuiScreen("editor", { closeCallback: false });
+export const page = new NuiScreen("editor", { closeCallback: false });
 
 /** The look editor (creator, clothing shop, barber) on the player's own ped. */
 class Editor {
@@ -83,35 +61,8 @@ class Editor {
     if (this.session) return false;
     // May run right after a model swap, before the cache has the new ped.
     const ped = PlayerPedId();
-    const items = await catalog.items(ped);
-    const pick = (
-      lists: Record<number, Item[]>,
-      ids: readonly number[],
-    ): Record<number, Item[]> =>
-      Object.fromEntries(ids.map((id) => [id, lists[id] ?? []]));
-    const componentIds =
-      mode === "barber"
-        ? [HAIR_COMPONENT]
-        : mode === "clothing"
-          ? CLOTHING_COMPONENTS
-          : [HAIR_COMPONENT, ...CLOTHING_COMPONENTS];
+    const data = await editorData(ped, mode, appearance);
     if (mode === "creator") RequestStreamedTextureDict(PORTRAIT_DICT, false);
-    const data: EditorData = {
-      mode,
-      appearance,
-      components: pick(items.components, componentIds),
-      props: mode === "barber" ? {} : pick(items.props, PROP_IDS),
-      overlayMax: Array.from(
-        { length: OVERLAYS },
-        (_, id) => GetNumHeadOverlayValues(id) - 1,
-      ),
-      hairColors: palette(GetNumHairColors(), GetPedHairRgbColor),
-      makeupColors: palette(GetNumMakeupColors(), GetPedMakeupRgbColor),
-      mothers: MOTHERS,
-      fathers: FATHERS,
-      price: mode === "creator" ? 0 : content.settings.prices[mode],
-      texts: loadLocaleTexts(),
-    };
     return new Promise((done) => {
       this.session = {
         mode,
@@ -194,16 +145,3 @@ class Editor {
 }
 
 export const editor = new Editor();
-
-// The editor's own methods read the raw page data.
-const raw = (data: unknown) => data;
-page.on(NuiCallback.preview, raw, (data) => editor.preview(data));
-page.on(NuiCallback.camera, raw, (data) => editor.focus(data));
-page.on(NuiCallback.drag, raw, (data) => editor.drag(data));
-page.on(NuiCallback.zoom, raw, (data) => editor.zoom(data));
-page.on(NuiCallback.save, raw, (data) => editor.save(data).catch(() => BUSY));
-page.on(
-  NuiCallback.cancel,
-  (data) => data ?? true,
-  () => editor.cancel(),
-);

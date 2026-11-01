@@ -1,7 +1,8 @@
 import { onServerEvent, registerExport } from "@aicore-fivem/lib/client";
 import { asArgs, waitFor } from "@aicore-fivem/lib/shared";
 import { CORE, toJobOutfit } from "@aicore-fivem/shared";
-import { toAppearance, type Appearance } from "common/appearance";
+import type { Appearance } from "common/appearance";
+import { toAppearance } from "common/appearanceParser";
 import { EVENTS } from "common/events";
 import { applyAppearance, applyOutfit, ensurePlayerModel } from "./skin";
 

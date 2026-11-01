@@ -4,6 +4,7 @@ import { Provider } from "react-redux";
 import { RouterProvider } from "@tanstack/react-router";
 import { config } from "@fortawesome/fontawesome-svg-core";
 import { applyPreview } from "./dev/preview";
+import "./features/editor/routes";
 import { router } from "./router";
 import { store } from "./store";
 import "./index.css";

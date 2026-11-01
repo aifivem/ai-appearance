@@ -2,36 +2,6 @@ exports = globalThis.exports;
 // \0rolldown/runtime.js
 var __commonJSMin = (cb, mod) => () => (mod || (cb((mod = { exports: {} }).exports, mod, mod.exports), cb = null), mod.exports);
 let node_fs_promises = require("node:fs/promises"), node_perf_hooks = require("node:perf_hooks");
-// ../../../packages/lib/src/server/rateLimit.ts
-var SourceLock = class {
-	active = new Set();
-	async run(source, busy, task) {
-		if (this.active.has(source)) return busy;
-		this.active.add(source);
-		try {
-			return await task();
-		} finally {
-			this.active.delete(source);
-		}
-	}
-	release(source) {
-		this.active.delete(source);
-	}
-}, RateLimit = class {
-	count;
-	windowMs;
-	hits = new Map();
-	constructor(count, windowMs) {
-		this.count = count, this.windowMs = windowMs;
-	}
-	take(source) {
-		let now = GetGameTimer(), recent = (this.hits.get(source) ?? []).filter((at) => now - at < this.windowMs);
-		return recent.length >= this.count ? (this.hits.set(source, recent), !1) : (recent.push(now), this.hits.set(source, recent), !0);
-	}
-	release(source) {
-		this.hits.delete(source);
-	}
-};
 // ../../../packages/lib/src/shared/read.ts
 function num(value, fallback, min = -Infinity, max = Infinity) {
 	return typeof value == "number" && Number.isFinite(value) ? Math.min(max, Math.max(min, value)) : fallback;
@@ -297,7 +267,36 @@ function withoutSchemaKey(value) {
 	let { $schema: _schema, ...rest } = value;
 	return rest;
 }
-var DataFile = class {
+// ../../../packages/lib/src/server/rateLimit.ts
+var SourceLock = class {
+	active = new Set();
+	async run(source, busy, task) {
+		if (this.active.has(source)) return busy;
+		this.active.add(source);
+		try {
+			return await task();
+		} finally {
+			this.active.delete(source);
+		}
+	}
+	release(source) {
+		this.active.delete(source);
+	}
+}, RateLimit = class {
+	count;
+	windowMs;
+	hits = new Map();
+	constructor(count, windowMs) {
+		this.count = count, this.windowMs = windowMs;
+	}
+	take(source) {
+		let now = GetGameTimer(), recent = (this.hits.get(source) ?? []).filter((at) => now - at < this.windowMs);
+		return recent.length >= this.count ? (this.hits.set(source, recent), !1) : (recent.push(now), this.hits.set(source, recent), !0);
+	}
+	release(source) {
+		this.hits.delete(source);
+	}
+}, DataFile = class {
 	resource;
 	name;
 	log;
@@ -497,7 +496,7 @@ var ClientGate = class {
 	}
 };
 // ../../../packages/lib/src/server/callback.ts
-const log$5 = createLogger(GetCurrentResourceName()), resource$4 = GetCurrentResourceName(), REFUSED = Symbol("refused");
+const log$5 = createLogger(GetCurrentResourceName()), resource$5 = GetCurrentResourceName(), REFUSED = Symbol("refused");
 function onClientCallback(name, first, second) {
 	let [handler, options] = typeof first == "function" ? [first, second ?? {}] : [second, first], gate = new ClientGate(name, options, 20);
 	onNet(requestEvent(name), async (caller, id, ...raw) => {
@@ -514,7 +513,7 @@ function onClientCallback(name, first, second) {
 	});
 }
 const pending$1 = new Map();
-onNet(responseEvent(resource$4), (id, ok, result) => {
+onNet(responseEvent(resource$5), (id, ok, result) => {
 	let entry = typeof id == "number" ? pending$1.get(id) : void 0;
 	entry && entry.source === Number(globalThis.source) && (pending$1.delete(id), clearTimeout(entry.timer), ok === !0 ? entry.resolve(result) : entry.reject(Error("client callback failed")));
 });
@@ -560,7 +559,7 @@ function toPatch(value) {
 		default: return null;
 	}
 }
-const clone = (value) => value === void 0 ? value : JSON.parse(JSON.stringify(value)), core$26 = resourceExport(CORE.resource), ERR = {
+const clone = (value) => value === void 0 ? value : JSON.parse(JSON.stringify(value)), core$27 = resourceExport(CORE.resource), ERR = {
 	type: "ADMIN_ERR_TYPE",
 	range: "ADMIN_ERR_RANGE",
 	length: "ADMIN_ERR_LENGTH",
@@ -574,7 +573,7 @@ const clone = (value) => value === void 0 ? value : JSON.parse(JSON.stringify(va
 		if (cached && Date.now() - cached.at < 2e3) return cached.values.size > 0 ? cached.values : null;
 		let list = [];
 		try {
-			list = core$26.GetLookupValues(source);
+			list = core$27.GetLookupValues(source);
 		} catch {}
 		let values = new Set(Array.isArray(list) ? list.filter((v) => typeof v == "string") : []);
 		return this.lists.set(source, {
@@ -703,11 +702,7 @@ function applyEdit(data, patch, spec) {
 	}
 	return [spec.kind === "records" ? patch.key : void 0];
 }
-// ../../../packages/lib/src/server/admin/jsonSchema.ts
-const SCHEMA_KEY = {
-	type: "string",
-	description: "This file's JSON Schema (for editors)."
-};
+// ../../../packages/lib/src/server/admin/descriptions.ts
 function langFile(resource) {
 	try {
 		let raw = JSON.parse(LoadResourceFile(resource, "locales/en.json") ?? "{}");
@@ -734,6 +729,11 @@ function describe(schema, file, lang) {
 	for (let tab of schema.tabs) if (tab.file === file) for (let card of tab.cards) collect(card.fields, "", lang, out);
 	return out;
 }
+// ../../../packages/lib/src/server/admin/jsonSchema.ts
+const SCHEMA_KEY = {
+	type: "string",
+	description: "This file's JSON Schema (for editors)."
+};
 function toJson(spec, path, desc) {
 	let description = desc.get(path), base = description ? { description } : {};
 	switch (spec.type) {
@@ -838,27 +838,20 @@ function writeSchema(resource, name, text, log) {
 	let dir = `${GetResourcePath(resource)}/data/schemas`;
 	(0, node_fs_promises.mkdir)(dir, { recursive: !0 }).then(() => (0, node_fs_promises.writeFile)(`${dir}/${name}.schema.json`, text, "utf8")).catch((error) => log.error(`writing ${resource}/${path} failed`, error));
 }
-// ../../../packages/lib/src/server/admin/panel.ts
-const core$25 = resourceExport(CORE.resource);
-var AdminPanel = class {
+// ../../../packages/lib/src/server/admin/panelFiles.ts
+const core$26 = resourceExport(CORE.resource);
+var PanelFiles = class {
 	schema;
 	data = new Map();
 	dataFiles = new Map();
 	handlers = new Map();
-	rules = new Map();
-	actions = new Map();
 	views = new FileViews((file) => this.get(file));
 	worldChanges = new Map();
 	resource = GetCurrentResourceName();
 	log = createLogger(this.resource);
-	editor = 0;
 	constructor(schema) {
 		this.schema = schema;
 		for (let [name, spec] of Object.entries(schema.files)) this.load(name, spec);
-		registerExport("AdminPanelSnapshot", () => this.snapshot()), registerExport("AdminPanelData", () => this.dataSnapshot()), registerExport("AdminPanelSummary", () => this.summary()), registerExport("AdminPanelApply", (admin, patch) => this.apply(admin, patch)), onClientCallback(ADMIN.worldChangesCallback(this.resource), () => Object.fromEntries(this.worldChanges), { rate: {
-			count: 4,
-			windowMs: 1e4
-		} }), setImmediate(() => core$25.RegisterAdminPanel(this.resource));
 	}
 	get(file) {
 		return this.data.get(file) ?? {};
@@ -866,17 +859,68 @@ var AdminPanel = class {
 	onChange(file, handler) {
 		this.handlers.set(file, [...this.handlers.get(file) ?? [], handler]);
 	}
-	rule(file, rule) {
-		this.rules.set(file, rule);
-	}
-	onAction(id, handler) {
-		this.actions.set(id, handler);
-	}
 	view(file, read) {
 		return this.views.view(file, read);
 	}
 	records(file, readOne) {
 		return this.views.records(file, readOne);
+	}
+	commit(file, key, value) {
+		let data = this.data.get(file);
+		data && (key === void 0 ? isRecord(value) && this.data.set(file, clone(value)) : value === null ? delete data[key] : data[key] = clone(value), this.changed(file, key));
+	}
+	commitAfter(file, key, value) {
+		setImmediate(() => this.commit(file, key, value));
+	}
+	store(patch, spec) {
+		let data = this.data.get(patch.file) ?? {}, keys = applyEdit(data, patch, spec);
+		if (keys.length !== 0) {
+			this.data.set(patch.file, data);
+			for (let key of keys) this.changed(patch.file, key);
+		}
+	}
+	changed(file, key) {
+		let spec = this.schema.files[file], data = this.get(file), value = key === void 0 ? data : data[key] ?? null;
+		this.dataFiles.get(file)?.write(data), this.views.changed(file, key, value);
+		for (let handler of this.handlers.get(file) ?? []) handler(key, value);
+		if (core$26.AdminPanelChanged({
+			resource: this.resource,
+			file,
+			key,
+			value: clone(value)
+		}), spec?.sync !== "all") return;
+		let changes = this.worldChanges.get(file) ?? {};
+		changes[key ?? ""] = clone(value), this.worldChanges.set(file, changes), emitNet(ADMIN.worldEvent(this.resource), -1, file, key ?? null, value);
+	}
+	load(name, spec) {
+		if (spec.memory) {
+			this.data.set(name, {});
+			return;
+		}
+		let file = new DataFile(this.resource, name, this.log);
+		this.dataFiles.set(name, file), file.schemaRef = `./schemas/${name}.schema.json`, writeSchema(this.resource, name, fileSchema(this.resource, this.schema, name, spec), this.log);
+		let raw = file.read(), data = isRecord(raw) ? raw : {}, filled = !1;
+		if (spec.kind === "settings") for (let [section, value] of Object.entries(spec.defaults ?? {})) section in data || (data[section] = clone(value), filled = !0);
+		this.data.set(name, data), (filled || raw === null || !file.hasSchemaRef()) && file.write(data);
+	}
+};
+// ../../../packages/lib/src/server/admin/panel.ts
+const core$25 = resourceExport(CORE.resource);
+var AdminPanel = class extends PanelFiles {
+	rules = new Map();
+	actions = new Map();
+	editor = 0;
+	constructor(schema) {
+		super(schema), registerExport("AdminPanelSnapshot", () => this.snapshot()), registerExport("AdminPanelData", () => this.dataSnapshot()), registerExport("AdminPanelSummary", () => this.summary()), registerExport("AdminPanelApply", (admin, patch) => this.apply(admin, patch)), onClientCallback(ADMIN.worldChangesCallback(this.resource), () => Object.fromEntries(this.worldChanges), { rate: {
+			count: 4,
+			windowMs: 1e4
+		} }), setImmediate(() => core$25.RegisterAdminPanel(this.resource));
+	}
+	rule(file, rule) {
+		this.rules.set(file, rule);
+	}
+	onAction(id, handler) {
+		this.actions.set(id, handler);
 	}
 	snapshot() {
 		return {
@@ -954,44 +998,6 @@ var AdminPanel = class {
 			};
 		}
 	}
-	commit(file, key, value) {
-		let data = this.data.get(file);
-		data && (key === void 0 ? isRecord(value) && this.data.set(file, clone(value)) : value === null ? delete data[key] : data[key] = clone(value), this.changed(file, key));
-	}
-	commitAfter(file, key, value) {
-		setImmediate(() => this.commit(file, key, value));
-	}
-	store(patch, spec) {
-		let data = this.data.get(patch.file) ?? {}, keys = applyEdit(data, patch, spec);
-		if (keys.length !== 0) {
-			this.data.set(patch.file, data);
-			for (let key of keys) this.changed(patch.file, key);
-		}
-	}
-	changed(file, key) {
-		let spec = this.schema.files[file], data = this.get(file), value = key === void 0 ? data : data[key] ?? null;
-		this.dataFiles.get(file)?.write(data), this.views.changed(file, key, value);
-		for (let handler of this.handlers.get(file) ?? []) handler(key, value);
-		if (core$25.AdminPanelChanged({
-			resource: this.resource,
-			file,
-			key,
-			value: clone(value)
-		}), spec?.sync !== "all") return;
-		let changes = this.worldChanges.get(file) ?? {};
-		changes[key ?? ""] = clone(value), this.worldChanges.set(file, changes), emitNet(ADMIN.worldEvent(this.resource), -1, file, key ?? null, value);
-	}
-	load(name, spec) {
-		if (spec.memory) {
-			this.data.set(name, {});
-			return;
-		}
-		let file = new DataFile(this.resource, name, this.log);
-		this.dataFiles.set(name, file), file.schemaRef = `./schemas/${name}.schema.json`, writeSchema(this.resource, name, fileSchema(this.resource, this.schema, name, spec), this.log);
-		let raw = file.read(), data = isRecord(raw) ? raw : {}, filled = !1;
-		if (spec.kind === "settings") for (let [section, value] of Object.entries(spec.defaults ?? {})) section in data || (data[section] = clone(value), filled = !0);
-		this.data.set(name, data), (filled || raw === null || !file.hasSchemaRef()) && file.write(data);
-	}
 };
 function labelOf(record, path) {
 	if (!path) return null;
@@ -1010,7 +1016,7 @@ function aiLogChannels(channels) {
 	optionalExport("ai-core")?.LogChannels(channels);
 }
 resourceExport(CORE.resource);
-// ../../../packages/lib/src/server/online.ts
+// ../../../packages/lib/src/server/online/mirror.ts
 const core$23 = resourceExport(CORE.resource);
 function reindex(index, source, before, after) {
 	for (let name of before) {
@@ -1022,7 +1028,7 @@ function reindex(index, source, before, after) {
 		set || index.set(name, set = new Set()), set.add(source);
 	}
 }
-var OnlinePlayers = class {
+var OnlineMirror = class {
 	players = new Map();
 	onDuty = new Map();
 	jobIndex = new Map();
@@ -1074,6 +1080,7 @@ var OnlinePlayers = class {
 		let set = this.onDuty.get(job);
 		set || this.onDuty.set(job, set = new Set()), set.add(source);
 	}
+}, OnlinePlayers = class extends OnlineMirror {
 	sources() {
 		return this.start(), this.players.keys();
 	}
@@ -1224,10 +1231,10 @@ new class {
 		let def = this.gangs.get(name);
 		return def === void 0 && this.gangs.set(name, def = core$19.GetGangDefinition(name) ?? null), def;
 	}
-}();
-// ../../../packages/lib/src/server/command.ts
+}(), createLogger(GetCurrentResourceName());
+// ../../../packages/lib/src/server/command/commandSet.ts
 const resource$3 = GetCurrentResourceName();
-createLogger(resource$3), new class {
+new class {
 	list = [];
 	sent = new Map();
 	announced = 0;
@@ -15550,7 +15557,7 @@ async function createDatabaseTables(resource, file) {
 		else for (let [name, definition] of statement.columns) columns.has(name) || (await mysql.query(`ALTER TABLE \`${statement.table}\` ADD COLUMN ${definition}`), log$1.info(`^2added column ${statement.table}.${name}^7 (${resource})`));
 	}
 }
-// ../../../packages/lib/src/fivem/scheduler.ts
+// ../../../packages/lib/src/fivem/scheduler/group.ts
 var Group = class {
 	interval;
 	jobs = Array(8);
@@ -15636,7 +15643,7 @@ new class {
 		}
 		groups.length = kept, this.nextDue = soonest;
 	};
-}(), IsDuplicityVersion(), resourceExport(CORE.resource), resourceExport(CORE.resource), resourceExport(CORE.resource), resourceExport(CORE.resource), resourceExport(CORE.resource);
+}(), IsDuplicityVersion(), IsDuplicityVersion(), resourceExport(CORE.resource), resourceExport(CORE.resource), resourceExport(CORE.resource), resourceExport(CORE.resource), resourceExport(CORE.resource);
 // ../../../packages/lib/src/server/buckets.ts
 const core$13 = resourceExport(CORE.resource), buckets = {
 	acquire: (tag) => core$13.AcquireBucket(tag),
@@ -15675,44 +15682,7 @@ const BARBER_OVERLAYS = [
 	OVERLAY.makeup,
 	OVERLAY.blush,
 	OVERLAY.lipstick
-], drawable = (index, texture = 0, collection = "") => ({
-	collection,
-	index,
-	texture
-}), none = () => drawable(-1);
-function defaultAppearance(sex) {
-	let male = sex === "male", components = Array.from({ length: 12 }, () => drawable(0));
-	male ? (components[4] = drawable(7), components[6] = drawable(1), components[8] = drawable(15)) : (components[3] = drawable(3), components[4] = drawable(0, 10), components[6] = drawable(3), components[8] = drawable(14), components[11] = drawable(3, 2));
-	let overlays = Array.from({ length: 13 }, () => ({
-		value: -1,
-		opacity: 0,
-		color1: 0,
-		color2: 0
-	}));
-	return overlays[OVERLAY.eyebrows] = {
-		value: 0,
-		opacity: 10,
-		color1: 0,
-		color2: 0
-	}, {
-		version: 1,
-		model: MODELS[sex],
-		headBlend: {
-			mother: 21,
-			father: 0,
-			shapeMix: male ? 70 : 30,
-			skinMix: 50
-		},
-		faceFeatures: Array.from({ length: 20 }, () => 0),
-		overlays,
-		hairColor: 0,
-		hairHighlight: 0,
-		eyeColor: 0,
-		components,
-		props: Array.from({ length: 8 }, none)
-	};
-}
-const COLLECTION = /^[A-Za-z0-9_ ]{0,64}$/;
+], sameDrawable = (a, b) => a?.collection === b?.collection && a?.index === b?.index && a?.texture === b?.texture, sameOverlay = (a, b) => a?.value === b?.value && a?.opacity === b?.opacity && a?.color1 === b?.color1 && a?.color2 === b?.color2, COLLECTION = /^[A-Za-z0-9_ ]{0,64}$/;
 function toDrawable(value, minIndex) {
 	if (!isRecord(value) || typeof value.collection != "string" || !COLLECTION.test(value.collection)) return null;
 	let index = readInt(value.index, minIndex, 4095), texture = readInt(value.texture, 0, 255);
@@ -15765,7 +15735,46 @@ function toAppearance(value) {
 		props
 	};
 }
-const sameDrawable = (a, b) => a?.collection === b?.collection && a?.index === b?.index && a?.texture === b?.texture, sameOverlay = (a, b) => a?.value === b?.value && a?.opacity === b?.opacity && a?.color1 === b?.color1 && a?.color2 === b?.color2, blip$1 = (value, sprite) => readBlipStyle(record(value), {
+// resource/common/defaultAppearance.ts
+const drawable = (index, texture = 0, collection = "") => ({
+	collection,
+	index,
+	texture
+}), none = () => drawable(-1);
+function defaultAppearance(sex) {
+	let male = sex === "male", components = Array.from({ length: 12 }, () => drawable(0));
+	male ? (components[4] = drawable(7), components[6] = drawable(1), components[8] = drawable(15)) : (components[3] = drawable(3), components[4] = drawable(0, 10), components[6] = drawable(3), components[8] = drawable(14), components[11] = drawable(3, 2));
+	let overlays = Array.from({ length: 13 }, () => ({
+		value: -1,
+		opacity: 0,
+		color1: 0,
+		color2: 0
+	}));
+	return overlays[OVERLAY.eyebrows] = {
+		value: 0,
+		opacity: 10,
+		color1: 0,
+		color2: 0
+	}, {
+		version: 1,
+		model: MODELS[sex],
+		headBlend: {
+			mother: 21,
+			father: 0,
+			shapeMix: male ? 70 : 30,
+			skinMix: 50
+		},
+		faceFeatures: Array.from({ length: 20 }, () => 0),
+		overlays,
+		hairColor: 0,
+		hairHighlight: 0,
+		eyeColor: 0,
+		components,
+		props: Array.from({ length: 8 }, none)
+	};
+}
+// resource/common/content.ts
+const blip$1 = (value, sprite) => readBlipStyle(record(value), {
 	sprite,
 	color: 47,
 	scale: .7
@@ -16093,7 +16102,10 @@ var Wearer = class {
 		this.charId = charId, this.sex = sex, this.appearance = appearance, this.creating = creating;
 	}
 };
-const wearers = new PlayerMap(), core = resourceExport("ai-core"), BUSY = fail("APPEARANCE_ERR_BUSY"), creatorBuckets = new PlayerMap({ onDrop: (_source, bucket) => buckets.release(bucket) });
+const wearers = new PlayerMap();
+// resource/server/session.ts
+aiLogChannels({ purchases: {} });
+const core = resourceExport("ai-core"), BUSY = fail("APPEARANCE_ERR_BUSY"), creatorBuckets = new PlayerMap({ onDrop: (_source, bucket) => buckets.release(bucket) });
 function enterCreatorBucket(source) {
 	leaveCreatorBucket(source);
 	let bucket = buckets.acquire("creator");
@@ -16137,7 +16149,6 @@ onCharacter({
 function pay(source, price, reason) {
 	return price <= 0 || content.settings.accounts.some((account) => core.RemoveMoney(source, account, price, reason));
 }
-// resource/server/index.ts
 onClientCallback(EVENTS.saveShop, {
 	args: ([rawShop, raw]) => {
 		let shopId = readText(rawShop, 64), appearance = toAppearance(raw);
@@ -16162,4 +16173,4 @@ onClientCallback(EVENTS.saveShop, {
 			price
 		}
 	}), { ok: !0 }) : fail("APPEARANCE_ERR_MONEY");
-}), aiLogChannels({ purchases: {} });
+});

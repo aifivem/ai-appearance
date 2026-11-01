@@ -1,4 +1,4 @@
-import { defaultAppearance } from "../../../resource/common/appearance";
+import { defaultAppearance } from "../../../resource/common/defaultAppearance";
 import type {
   EditorData,
   EditorMode,
