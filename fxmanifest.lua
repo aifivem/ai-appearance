@@ -1,6 +1,6 @@
 name 'ai-appearance'
 author 'TGIANN'
-version '0.2.1' -- x-release-please-version
+version '0.2.2' -- x-release-please-version
 license 'GPL-3.0-only'
 description 'Character creator, clothing shops and barbers'
 repository 'https://github.com/aifivem/ai-appearance'

@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.2](https://github.com/aifivem/ai-appearance/compare/v0.2.1...v0.2.2) (2026-11-01)
+
+
+### Code Refactoring
+
+* feature folders, side entries that only import, panel schema per tab ([3ef8f3f](https://github.com/aifivem/ai-appearance/commit/3ef8f3f62922df9e30e7c360997b61e7d0ee60d9))
+
 ## [0.2.1](https://github.com/aifivem/ai-appearance/compare/v0.2.0...v0.2.1) (2026-10-31)
 
 
