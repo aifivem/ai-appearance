@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.2.4](https://github.com/aifivem/ai-appearance/compare/v0.2.3...v0.2.4) (2026-11-02)
+
+
+### Documentation
+
+* install from the release zip ([9c63d1b](https://github.com/aifivem/ai-appearance/commit/9c63d1b27104e712ed0fc7646e2494b7e0f6df27))
+
+
+### Miscellaneous Chores
+
+* build files are no longer in git, the release zip carries them ([f641867](https://github.com/aifivem/ai-appearance/commit/f64186757673e09950c86a7583ff4c80950ff22b))
+
 ## [0.2.3](https://github.com/aifivem/ai-appearance/compare/v0.2.2...v0.2.3) (2026-11-02)
 
 
