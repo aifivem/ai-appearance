@@ -4,7 +4,7 @@ import {
   onStop,
   pedHeadshot,
   requestModel,
-} from "@aicore-fivem/lib/client";
+} from "@aifivem/lib/client";
 import {
   asArgs,
   createLogger,
@@ -12,8 +12,8 @@ import {
   readId,
   sleep,
   waitFor,
-} from "@aicore-fivem/lib/shared";
-import { CORE } from "@aicore-fivem/shared";
+} from "@aifivem/lib/shared";
+import { CORE } from "@aifivem/shared";
 import type { Appearance } from "common/appearance";
 import { toAppearance } from "common/appearanceParser";
 import { EVENTS } from "common/events";

@@ -3,8 +3,8 @@ import {
   NuiScreen,
   player,
   triggerServerCallback,
-} from "@aicore-fivem/lib/client";
-import { fail, isRecord, replyError } from "@aicore-fivem/lib/shared";
+} from "@aifivem/lib/client";
+import { fail, isRecord, replyError } from "@aifivem/lib/shared";
 import { toAppearance } from "common/appearanceParser";
 import type { Appearance } from "common/appearance";
 import { EVENTS, type SaveResult } from "common/events";

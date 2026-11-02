@@ -1,4 +1,4 @@
-import type { Sex } from "@aicore-fivem/shared";
+import type { Sex } from "@aifivem/shared";
 
 /** A character's look, stored as JSON per character and applied on the client. Indexes are the game's own ids. */
 

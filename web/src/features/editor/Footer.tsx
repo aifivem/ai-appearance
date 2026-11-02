@@ -10,7 +10,7 @@ import { Button } from "../../components/ui/button";
 import { useLang } from "../../lib/lang";
 import { useAppSelector } from "../../store";
 import { cancel, save } from "./actions";
-import { groupDigits } from "@aicore-fivem/lib/shared";
+import { groupDigits } from "@aifivem/lib/shared";
 
 const money = (value: number): string => `$${groupDigits(value)}`;
 

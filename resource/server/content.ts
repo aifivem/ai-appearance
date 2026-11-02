@@ -1,4 +1,4 @@
-import { AdminPanel } from "@aicore-fivem/lib/server";
+import { AdminPanel } from "@aifivem/lib/server";
 import { AppearanceContent } from "common/content";
 import { appearanceSchema } from "./schema";
 

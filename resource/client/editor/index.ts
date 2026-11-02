@@ -1,4 +1,4 @@
-import { NUI_LAYER } from "@aicore-fivem/shared";
+import { NUI_LAYER } from "@aifivem/shared";
 import { NuiCallback } from "common/nui";
 import { BUSY, editor, page } from "./editor";
 

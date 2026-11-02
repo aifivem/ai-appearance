@@ -3,8 +3,8 @@ import {
   PLACE_PED_SPEC,
   placePedFields,
   spec,
-} from "@aicore-fivem/lib/shared";
-import type { DataSpec, PanelSchema } from "@aicore-fivem/shared";
+} from "@aifivem/lib/shared";
+import type { DataSpec, PanelSchema } from "@aifivem/shared";
 
 /** ai-appearance's panel: the creator room, prices, pay accounts, blips and the store locations. */
 

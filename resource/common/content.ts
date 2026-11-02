@@ -9,7 +9,7 @@ import {
   record,
   vec4,
   type Vec4,
-} from "@aicore-fivem/lib/shared";
+} from "@aifivem/lib/shared";
 import type { ShopType } from "./pricing";
 
 /** Panel content (`data/settings.json`, `data/shops.json`): the server reads it from its admin panel store, clients from the world mirror. */

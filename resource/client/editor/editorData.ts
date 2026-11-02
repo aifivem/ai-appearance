@@ -1,4 +1,4 @@
-import { loadLocaleTexts } from "@aicore-fivem/lib/client";
+import { loadLocaleTexts } from "@aifivem/lib/client";
 import {
   CLOTHING_COMPONENTS,
   HAIR_COMPONENT,

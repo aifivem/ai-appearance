@@ -1,4 +1,4 @@
-import type { Sex } from "@aicore-fivem/shared";
+import type { Sex } from "@aifivem/shared";
 import {
   COMPONENTS,
   FACE_FEATURES,

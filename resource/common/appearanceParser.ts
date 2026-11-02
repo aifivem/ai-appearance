@@ -1,4 +1,4 @@
-import { isRecord, readInt } from "@aicore-fivem/lib/shared";
+import { isRecord, readInt } from "@aifivem/lib/shared";
 import {
   COMPONENTS,
   FACE_FEATURES,

@@ -1,5 +1,5 @@
-import { requestModel } from "@aicore-fivem/lib/client";
-import type { JobOutfit } from "@aicore-fivem/shared";
+import { requestModel } from "@aifivem/lib/client";
+import type { JobOutfit } from "@aifivem/shared";
 import {
   COMPONENTS,
   HAIR_COLOURED_OVERLAYS,
