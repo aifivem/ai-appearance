@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.2.3](https://github.com/aifivem/ai-appearance/compare/v0.2.2...v0.2.3) (2026-11-02)
+
+
+### Bug Fixes
+
+* **build:** keep the web build in dist/ so release zips have the NUI ([ff5fd9b](https://github.com/aifivem/ai-appearance/commit/ff5fd9bbe2f9d8779ac1ab6f93819d6809b0c682))
+
+
+### Code Refactoring
+
+* import the shared packages from [@aifivem](https://github.com/aifivem) ([831d5a5](https://github.com/aifivem/ai-appearance/commit/831d5a5f4f0ed63f3869b51933fc183a13c8d573))
+
 ## [0.2.2](https://github.com/aifivem/ai-appearance/compare/v0.2.1...v0.2.2) (2026-11-01)
 
 
