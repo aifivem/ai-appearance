@@ -6,6 +6,7 @@ import {
   coordsOf,
   onCharacter,
   onClientCallback,
+  optionalExport,
   PlayerMap,
   resourceExport,
 } from "@aifivem/lib/server";
@@ -157,6 +158,7 @@ onClientCallback(
       source,
       metadata: { shop: shop.id, type: shop.type, changes, price },
     });
+    optionalExport("ai-police")?.ReportSighting(source, "clothing");
     return { ok: true };
   },
 );
