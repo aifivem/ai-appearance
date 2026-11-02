@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.0](https://github.com/aifivem/ai-appearance/compare/v0.2.4...v0.3.0) (2026-11-02)
+
+
+### New Features
+
+* **appearance:** report wanted suspects to ai-police on a paid save ([1c36fc7](https://github.com/aifivem/ai-appearance/commit/1c36fc7068c36c66b4a241966def3fe14846328d))
+
 ## [0.2.4](https://github.com/aifivem/ai-appearance/compare/v0.2.3...v0.2.4) (2026-11-02)
 
 
